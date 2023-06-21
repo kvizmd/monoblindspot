@@ -1,0 +1,48 @@
+TARGET_MODE: 'depth'
+
+DATA:
+  ROOT_DIR: '@REQUIRED@'
+
+  SCALES: [0, 1, 2, 3]
+  FRAME_IDXS: [0, -1, 1]
+
+TRAIN:
+  MAX_EPOCHS: 20
+  LOGGING_ITER: 1000
+  FIGSAVE_ITER: 1000
+  LR_MILESTONES: [15]
+  EVAL_BATCHES: 200
+
+  GRAD_CLIP: -1.0
+
+  DEPTH:
+    LR: 0.0001
+
+  POSE:
+    LR: 0.0001
+
+MODEL:
+  DEPTH:
+    ENABLED: True
+    NUM_LAYERS: 18
+    SCALES: [0, 1, 2, 3]
+    MIN_DEPTH: 0.1
+    MAX_DEPTH: 100
+
+  POSE:
+    ENABLED: True
+    NUM_LAYERS: 18
+
+  BS:
+    ENABLED: False
+
+LOSS:
+  BS:
+    FACTOR: 0.0
+
+  DEPTH:
+    FACTOR: 1.0
+    SMOOTH_FACTOR: 0.001
+    SCALES: [0, 1, 2, 3]
+    FRAME_IDXS: [0, -1, 1]
+    SMOOTH_SCALING: True

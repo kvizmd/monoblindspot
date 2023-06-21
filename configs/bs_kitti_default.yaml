@@ -1,0 +1,56 @@
+NUM_WORKERS: 4
+TARGET_MODE: 'bs'
+
+DATA:
+  NAME: 'KITTI'
+  ROOT_DIR: '@REQUIRED@'
+  TRAIN_SPLIT: 'splits/kitti/bs/train_files.txt'
+  VAL_SPLIT: 'splits/kitti/bs/val_files.txt'
+  TEST_SPLIT: 'splits/kitti/bs/test_files.txt'
+
+  BATCH_SIZE: 48
+  IMG_HEIGHT: 192
+  IMG_WIDTH: 640
+
+  SCALES: [0]
+  FRAME_IDXS: [0]
+
+TRAIN:
+  MAX_EPOCHS: 64
+  LOGGING_ITER: 50
+  FIGSAVE_ITER: 300
+  LR_MILESTONES: [45, 58]
+  WARMUP_ITERS: 1000
+  GRAD_CLIP: 50.0
+
+  BS:
+    ENCODER_LR: 0.0001
+    DECODER_LR: 0.0001
+
+    OFFLINE_LABELS: '@REQUIRED@'
+
+MODEL:
+  DEPTH:
+    ENABLED: False
+
+  POSE:
+    ENABLED: False
+
+  BS:
+    ENABLED: True
+    NAME: 'dla_iam'
+    NUM_LAYERS: 34
+    INSTANCES: 64
+    DOWN_RATIO: 8
+
+LOSS:
+  BS:
+    FACTOR: 1.0
+    CLS_FACTOR: 1.0
+    OCC_FACTOR: 0.0
+    POS3D_FACTOR: 0.0
+    POS2D_FACTOR: 5.0
+    DEPTH_FACTOR: 0.0
+
+  DEPTH:
+    FACTOR: 0.0

@@ -1,0 +1,11 @@
+matplotlib
+mlflow
+opencv-python-headless
+scipy
+six
+tqdm
+yacs
+scikit-image
+# PyQt5
+# nuscenes-devkit
+# mayavi

@@ -1,0 +1,24 @@
+_BASE_: 'configs/depth_default.yaml'
+
+DATA:
+  NAME: 'KITTI'
+  TRAIN_SPLIT: 'splits/kitti/eigen_zhou/train_files.txt'
+  VAL_SPLIT: 'splits/kitti/eigen_zhou/val_files.txt'
+  TEST_SPLIT: 'splits/kitti/eigen/test_files.txt'
+
+  BATCH_SIZE: 8
+  IMG_HEIGHT: 192
+  IMG_WIDTH: 640
+
+TRAIN:
+  MAX_EPOCHS: 20
+  LR_MILESTONES: [15]
+  WARMUP_ITERS: 300
+
+  DEPTH:
+    LR: 0.0001
+
+  POSE:
+    LR: 0.0001
+
+  REFERENCE_METRIC: 'a1'

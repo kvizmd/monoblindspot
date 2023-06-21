@@ -1,0 +1,22 @@
+_BASE_: 'configs/depth_default.yaml'
+
+DATA:
+  NAME: 'nusc'
+  TRAIN_SPLIT: 'splits/nusc/train_files.txt'
+  VAL_SPLIT: 'splits/nusc/test_files.txt'
+  TEST_SPLIT: 'splits/nusc/test_files.txt'
+
+  BATCH_SIZE: 4
+  IMG_HEIGHT: 352
+  IMG_WIDTH: 640
+
+TRAIN:
+  MAX_EPOCHS: 20
+  LR_MILESTONES: [15]
+  WARMUP_ITERS: 300
+
+  DEPTH:
+    LR: 0.0001
+
+  POSE:
+    LR: 0.0001
