@@ -36,7 +36,7 @@ We uses the same conversion step as [monodepth2](https://github.com/nianticlabs/
 The following command converts the KITTI `png` images into `jpeg` images and **removes the original images**.
 
 ```shell
-$ find kitti_data/ -name '*.png' | parallel 'convert -quality 92 -sampling-factor 2x2,1x1,1x1 {.}.png {.}.jpg && rm {}'
+$ find data/kitti -name '*.png' | parallel 'convert -quality 92 -sampling-factor 2x2,1x1,1x1 {.}.png {.}.jpg && rm {}'
 ```
 
 ## Depth Evaluation
