@@ -18,15 +18,12 @@ class GroundPlaneFit(nn.Module):
             self,
             height: int,
             width: int,
-            max_iterations: int = 200,
-            goal_inliers_ratio: float = 0.7):
+            max_iterations: int = 200):
         """
         Args:
           height                : Height of image.
           width                 : Width of image.
           max_iterations        : Max iteration of RANSAC.
-          goal_inliers_ratio    : Ratio of inliers that the model considers
-                                  sufficient in RANSAC.
         """
 
         super().__init__()
