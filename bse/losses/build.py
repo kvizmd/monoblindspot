@@ -21,7 +21,6 @@ def build_criterion(cfg) -> dict:
         crits['bs'] = bs_crit(
             factor=cfg.LOSS.BS.FACTOR,
             cls_factor=cfg.LOSS.BS.CLS_FACTOR,
-            occ_factor=cfg.LOSS.BS.OCC_FACTOR,
             pos_2d_factor=cfg.LOSS.BS.POS2D_FACTOR,
             offset_factor=cfg.LOSS.BS.OFFSET_FACTOR,
             score_match=cfg.LOSS.BS.SCORE_MATCH,
