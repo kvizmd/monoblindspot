@@ -202,7 +202,7 @@ $ cp -r data_depth_annotated/train/* /path/to/kitti
 $ cp -r data_depth_annotated/val/* /path/to/kitti
 ```
 #### 2. Generate the depth map of the ground from the LiDAR point cloud.
-1. Export a depth map of the ground using the following script.
+Export a depth map of the ground using the following script.
 ```shell
 $ python export_ground_depth.py \
     --data_dir /path/to/kitti \
