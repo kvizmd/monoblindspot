@@ -36,7 +36,7 @@ We uses the same conversion step as [monodepth2](https://github.com/nianticlabs/
 The following command converts the KITTI `png` images into `jpeg` images and **removes the original images**.
 
 ```shell
-$ find kitti_data/ -name '*.png' | parallel 'convert -quality 92 -sampling-factor 2x2,1x1,1x1 {.}.png {.}.jpg && rm {}'
+$ find data/kitti -name '*.png' | parallel 'convert -quality 92 -sampling-factor 2x2,1x1,1x1 {.}.png {.}.jpg && rm {}'
 ```
 
 ## Depth Evaluation
@@ -202,7 +202,7 @@ $ cp -r data_depth_annotated/train/* /path/to/kitti
 $ cp -r data_depth_annotated/val/* /path/to/kitti
 ```
 #### 2. Generate the depth map of the ground from the LiDAR point cloud.
-1. Export a depth map of the ground using the following script.
+Export a depth map of the ground using the following script.
 ```shell
 $ python export_ground_depth.py \
     --data_dir /path/to/kitti \
