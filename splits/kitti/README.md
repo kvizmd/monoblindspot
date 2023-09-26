@@ -181,7 +181,6 @@ The annotated json file is placed at the following location in KITTI dataset.
       │  │  │  └─ ...
       │  │  ├─ data/
       │  │  └─ timestamps.txt
-      │  │
       │  ├─ image_03/
       │  ├─ oxts/
       │  ├─ proj_depth/
