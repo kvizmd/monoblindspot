@@ -4,14 +4,14 @@ on:
   push:
     branches:
       - "main"
+    paths:
+      - 'bse/**'
+      - 'tests/**'
+      - '*.py'
+
   pull_request:
     branches:
       - "main"
-  paths:
-    - 'bse/**'
-    - 'tests/**'
-    - '*.py'
-
 jobs:
   ubuntu:
     runs-on: ubuntu-20.04
