@@ -139,8 +139,8 @@ The checkpoints are coming soon.
 
 |**Model**|**FPS**|**Parameter (M)**|**Link**|
 |:---:|:---:|:---:|:---:|
-|Resnet18-SparseInst-IAM|124.4|16.6|download|
-|DLA34-IAM|72.6|21.1|download|
+|Resnet18-SparseInst-IAM|124.4|16.60|download|
+|DLA34-IAM|72.6|21.07|download|
 
 **FPS** was measured on NVIDIA TITAN V with `torch.backends.cudnn.benchmark` enabled.
 
