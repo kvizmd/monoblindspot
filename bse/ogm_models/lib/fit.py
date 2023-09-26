@@ -1,12 +1,7 @@
-# from functools import lru_cache
-
 import torch
 from torch import nn
 
-from bse.utils.ransac import \
-    RANSAC, \
-    is_inlier, \
-    do_faster_ransac
+from bse.utils.ransac import is_inlier, do_faster_ransac
 
 
 class GroundPlaneFit(nn.Module):
@@ -186,11 +181,3 @@ def create_x_rotmat(theta: torch.Tensor) -> torch.Tensor:
     x_rotate[:, 2, 1] = torch.sin(theta)
     x_rotate[:, 2, 2] = torch.cos(theta)
     return x_rotate
-
-
-def get_rectified_plane(plane: torch.Tensor) -> torch.Tensor:
-    return torch.stack([
-        torch.zeros_like(plane[:, 0]),
-        torch.ones_like(plane[:, 1]),
-        torch.zeros_like(plane[:, 2]),
-        plane[:, 3]], dim=-1)
