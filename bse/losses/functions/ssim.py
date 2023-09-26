@@ -3,10 +3,6 @@ from torch import nn
 
 
 class SSIM(nn.Module):
-    """
-    Layer to compute the SSIM loss between a pair of images
-    """
-
     def __init__(self):
         super(SSIM, self).__init__()
         self.mu_x_pool = nn.AvgPool2d(3, 1)

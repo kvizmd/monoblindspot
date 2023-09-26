@@ -142,6 +142,8 @@ The checkpoints are coming soon.
 |Resnet18-SparseInst-IAM|124.4|16.6|download|
 |DLA34-IAM|72.6|21.1|download|
 
+**FPS** was measured on NVIDIA TITAN V with `torch.backends.cudnn.benchmark enabled`.
+
 
 ## Development
 We employ the `unittest` library for unit tests, which is executable with the following command.

@@ -29,7 +29,5 @@ class FocalLoss(nn.Module):
 
         B = target.shape[0]
         pnum = target.ge(1).view(B, -1).sum(dim=1)
-        pnum[pnum == 0] = 1
-
-        loss = loss.view(B, -1).sum(dim=1) / pnum
+        loss = loss.view(B, -1).sum(dim=1) / pnum.clamp(min=1)
         return loss.mean()

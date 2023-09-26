@@ -1,4 +1,4 @@
-FROM nvidia/cuda:11.2.2-devel-ubuntu20.04
+FROM nvidia/cuda:11.7.1-devel-ubuntu20.04
 
 ENV DEBCONF_NOWARNINGS=yes
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
@@ -23,5 +23,7 @@ RUN apt remove -y python3-blinker
 
 RUN pip3 install pip --upgrade
 RUN pip3 install \
-  torch torchvision torchaudio \
-  --extra-index-url https://download.pytorch.org/whl/cu113
+  torch==2.0.0+cu117 \
+  torchvision==0.15.1+cu117 \
+  torchaudio==2.0.1 \
+  --index-url https://download.pytorch.org/whl/cu117
