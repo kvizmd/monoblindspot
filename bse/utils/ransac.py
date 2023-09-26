@@ -30,7 +30,7 @@ class RANSAC(torch.nn.Module):
 
         self.signif_logit = math.log(1 - goal_inliers_ratio)
 
-    def run(self, data: torch.Tensor,) -> torch.Tensor:
+    def run(self, data: torch.Tensor) -> torch.Tensor:
         """
         Launch RANSAC optimization.
         data: The tensor of (B, N, 3) shape.
