@@ -31,6 +31,12 @@ Download raw data sequences and calibration files from [the official website](ht
    └─ 2011_10_03/
 ```
 
+To download these files, you can do so in batches based on the list provided by [monodepth2](https://github.com/nianticlabs/monodepth2/blob/master/splits/kitti_archives_to_download.txt). Simply run the following.
+
+```shell
+$ wget -i kitti_archives_to_download.txt -P data/kitti
+```
+
 ## Preparation
 We uses the same conversion step as [monodepth2](https://github.com/nianticlabs/monodepth2#-kitti-training-data) for fast training.
 The following command converts the KITTI `png` images into `jpeg` images and **removes the original images**.
