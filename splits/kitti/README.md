@@ -8,27 +8,27 @@
 Download raw data sequences and calibration files from [the official website](https://www.cvlibs.net/datasets/kitti/raw_data.php) and put them as follows.
 
 ```
-  kitti/
-    2011_09_26/
-      2011_09_26_drive_0001_sync/
-        image_00/
-        image_01/
-        image_02/
-        image_03/
-        oxts/
-        proj_depth/
-        velodyne_points/
-      2011_09_26_drive_0002_sync/
-      2011_09_26_drive_0005_sync/
-      2011_09_26_drive_0009_sync/
-      2011_09_26_drive_0011_sync/
-      2011_09_26_drive_0013_sync/
-      2011_09_26_drive_0014_sync/
-      ...
-    2011_09_28/
-    2011_09_29/
-    2011_09_30/
-    2011_10_03/
+└─ kitti/
+   ├─ 2011_09_26/
+   │  ├─ 2011_09_26_drive_0001_sync/
+   │  │  ├─ image_00/
+   │  │  ├─ image_01/
+   │  │  ├─ image_02/
+   │  │  ├─ image_03/
+   │  │  ├─ oxts/
+   │  │  ├─ proj_depth/
+   │  │  └─ velodyne_points/
+   │  ├─ 2011_09_26_drive_0002_sync/
+   │  ├─ 2011_09_26_drive_0005_sync/
+   │  ├─ 2011_09_26_drive_0009_sync/
+   │  ├─ 2011_09_26_drive_0011_sync/
+   │  ├─ 2011_09_26_drive_0013_sync/
+   │  ├─ 2011_09_26_drive_0014_sync/
+   │  └─ ...
+   ├─ 2011_09_28/
+   ├─ 2011_09_29/
+   ├─ 2011_09_30/
+   └─ 2011_10_03/
 ```
 
 ## Preparation
@@ -164,32 +164,33 @@ Annotate with one of the following labels: `blindspot`, `ground`, or `ambiguous`
 The annotated json file is placed at the following location in KITTI dataset.
 
 ```
-  kitti/
-    2011_09_26/
-    2011_09_28/
-    2011_09_29/
-    2011_09_30/
-    2011_10_03/
-      2011_10_03_drive_0027_sync/
-      2011_10_03_drive_0034_sync/
-        image_00/
-        image_01/
-        image_02/
-          bs/
-            0000001215.json    <=========== HERE
-            0000002024.json
-            ...
-          data/
-          timestamps.txt
-        image_03/
-        oxts/
-        proj_depth/
-        velodyne_points/
-      2011_10_03_drive_0042_sync/
-      2011_10_03_drive_0047_sync/
-      calib_cam_to_cam.txt
-      calib_imu_to_velo.txt
-      calib_velo_to_cam.txt
+└─ kitti/
+   ├─ 2011_09_26/
+   ├─ 2011_09_28/
+   ├─ 2011_09_29/
+   ├─ 2011_09_30/
+   └─ 2011_10_03/
+      ├─ 2011_10_03_drive_0027_sync/
+      ├─ 2011_10_03_drive_0034_sync/
+      │  ├─ image_00/
+      │  ├─ image_01/
+      │  ├─ image_02/
+      │  │  ├─ bs/
+      │  │  │  ├─ 0000001215.json    <=========== HERE
+      │  │  │  ├─ 0000002024.json
+      │  │  │  └─ ...
+      │  │  ├─ data/
+      │  │  └─ timestamps.txt
+      │  │
+      │  ├─ image_03/
+      │  ├─ oxts/
+      │  ├─ proj_depth/
+      │  └─ velodyne_points/
+      ├─ 2011_10_03_drive_0042_sync/
+      ├─ 2011_10_03_drive_0047_sync/
+      ├─ calib_cam_to_cam.txt
+      ├─ calib_imu_to_velo.txt
+      └─ calib_velo_to_cam.txt
 ```
 
 ### Ground Depth Map
@@ -215,31 +216,31 @@ This script applies RANSAC to the point cloud with refering the annotated mask, 
 The generated depth maps should be placed in the following directory.
 
 ```
-  kitti/
-    2011_09_26/
-    2011_09_28/
-    2011_09_29/
-    2011_09_30/
-    2011_10_03/
-      2011_10_03_drive_0027_sync/
-      2011_10_03_drive_0034_sync/
-        image_00/
-        image_01/
-        image_02/
-          bs/
-          data/
-          ground_depth/
-            0000001215.png <=========== HERE
-            0000002024.png
-            ...
-          timestamps.txt
-        image_03/
-        oxts/
-        proj_depth/
-        velodyne_points/
-      2011_10_03_drive_0042_sync/
-      2011_10_03_drive_0047_sync/
-      calib_cam_to_cam.txt
-      calib_imu_to_velo.txt
-      calib_velo_to_cam.txt
+└─ kitti/
+   ├─ 2011_09_26/
+   ├─ 2011_09_28/
+   ├─ 2011_09_29/
+   ├─ 2011_09_30/
+   └─ 2011_10_03/
+      ├─ 2011_10_03_drive_0027_sync/
+      ├─ 2011_10_03_drive_0034_sync/
+      │  ├─ image_00/
+      │  ├─ image_01/
+      │  ├─ image_02/
+      │  │  ├─ bs/
+      │  │  ├─ data/
+      │  │  ├─ ground_depth/
+      │  │  │  ├─ 0000001215.png <=========== HERE
+      │  │  │  ├─ 0000002024.png
+      │  │  │  └─ ...
+      │  │  └─ timestamps.txt
+      │  ├─ image_03/
+      │  ├─ oxts/
+      │  ├─ proj_depth/
+      │  └─ velodyne_points/
+      ├─ 2011_10_03_drive_0042_sync/
+      ├─ 2011_10_03_drive_0047_sync/
+      ├─ calib_cam_to_cam.txt
+      ├─ calib_imu_to_velo.txt
+      └─ calib_velo_to_cam.txt
 ```
