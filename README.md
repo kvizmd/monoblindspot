@@ -42,7 +42,7 @@ Currently, there is no support for extensions to custom datasets.
 ## Training
 The entire training pipeline can be executable in `train.py`, and the training target is switched depending on the configuration file passed to the `--config` option.
 
-To configure your settings, such as specifying a path or batch size, please take key/value pairs separated by spaces in the --opts option, such as `--opts DATA.ROOT data/kitti DATA.BATCH_SIZE 2 DEVICE cuda:1`.
+To configure your settings, such as specifying a path or batch size, please take key/value pairs separated by spaces in the `--opts` option, such as `--opts DATA.ROOT data/kitti DATA.BATCH_SIZE 2 DEVICE cuda:1`.
 If you do not want to type long strings on the command line, please create a new configuration file by inheriting the configuration file with the `_BASE_` key in the YAML file as the following example.
 
 ```yaml
