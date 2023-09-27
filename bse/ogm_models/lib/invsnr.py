@@ -162,7 +162,7 @@ class InverseSensorModel(torch.nn.Module):
             height_mask = xyz[1] < xyz[1].quantile(self.height_quantile)
             valid_mask = height_mask & range_mask
 
-            # The zero weights implies invalid points (e.g. avobe eye level)
+            # The zero weights implies invalid points
             # since perfect zeros are rare as a result of the computer
             # calculation, so ignore these points
             obj_mask = valid_mask & (~g_mask) & (score > 0)
