@@ -82,35 +82,32 @@ def build_bsgen_dataset(cfg, keys: list = ['train', 'val', 'test']):
 
     datasets = {}
 
-    require_depth_gts = 'scale' in cfg.OGM.NAME.lower()
-    require_pose = 'oxts' in cfg.OGM.NAME.lower()
-
     if 'train' in keys:
         datasets['train'] = train_dataset(
             cfg.DATA.ROOT_DIR, train_filenames,
             cfg.DATA.IMG_HEIGHT, cfg.DATA.IMG_WIDTH,
             cfg.DATA.FRAME_IDXS, scales, is_train=False,
-            require_depth_gt=require_depth_gts,
-            require_adjacent_depth_gt=require_depth_gts,
-            require_pose=require_pose)
+            require_depth_gt=False,
+            require_adjacent_depth_gt=False,
+            require_pose=False)
 
     if 'val' in keys:
         datasets['val'] = val_dataset(
             cfg.DATA.ROOT_DIR, val_filenames,
             cfg.DATA.IMG_HEIGHT, cfg.DATA.IMG_WIDTH,
             cfg.DATA.FRAME_IDXS, scales, is_train=False,
-            require_depth_gt=require_depth_gts,
-            require_adjacent_depth_gt=require_depth_gts,
-            require_pose=require_pose)
+            require_depth_gt=False,
+            require_adjacent_depth_gt=False,
+            require_pose=False)
 
     if 'test' in keys:
         datasets['test'] = test_dataset(
             cfg.DATA.ROOT_DIR, test_filenames,
             cfg.DATA.IMG_HEIGHT, cfg.DATA.IMG_WIDTH,
             cfg.DATA.FRAME_IDXS, scales, is_train=False,
-            require_depth_gt=require_depth_gts,
-            require_adjacent_depth_gt=require_depth_gts,
-            require_pose=require_pose)
+            require_depth_gt=False,
+            require_adjacent_depth_gt=False,
+            require_pose=False)
 
     if len(keys) == 1:
         return datasets[keys[0]]
