@@ -1,7 +1,0 @@
-_BASE_: configs/bsgt_kitti.yaml
-NUM_WORKERS: 1
-
-DATA:
-  BATCH_SIZE: 1
-  IMG_HEIGHT: 384
-  IMG_WIDTH: 1280
