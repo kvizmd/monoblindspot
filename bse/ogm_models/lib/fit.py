@@ -52,9 +52,9 @@ class GroundPlaneFit(nn.Module):
 
         Args:
           ptcloud   : Point cloud
+          K         : Camera intrinsic
           threshold : Threshold for the distance to be considered as inliers.
                       If None, adaptively and automatically chosen.
-          invert_y_axis: Reverse the y-axis direction.
         """
         ground_prior_mask = self.get_ground_prior(K).to(ptcloud.device)
         prior_ptcloud = ptcloud[..., ground_prior_mask.view(-1)]
