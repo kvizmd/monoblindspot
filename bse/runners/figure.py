@@ -21,7 +21,7 @@ DPI = 100
 
 
 @contextlib.contextmanager
-def make_depth_figure(inputs, outputs) -> plt.Figure:
+def make_depth_figure(inputs: dict, outputs: dict) -> plt.Figure:
     fig = plt.figure(figsize=(12, 5), tight_layout=True, dpi=DPI)
 
     color = to_numpy(inputs['color', 0, 0][0])
@@ -48,7 +48,10 @@ def make_depth_figure(inputs, outputs) -> plt.Figure:
 
 
 @contextlib.contextmanager
-def make_bs_figure(inputs, outputs) -> plt.Figure:
+def make_bs_figure(
+        inputs: dict,
+        outputs: dict,
+        score_thr: float = 0.3) -> plt.Figure:
     color = to_numpy(inputs['color', 0, 0][0])
     pred_points = to_numpy(outputs['bs_point', 0, 0][0])
     pred_scores = to_numpy(outputs['bs_confidence', 0, 0][0])
@@ -68,6 +71,10 @@ def make_bs_figure(inputs, outputs) -> plt.Figure:
 
     gt_hm = put_colorized_points(height, width, gt_points, gt_scores)
     gt_color = alpha_blend(color, gt_hm, None)
+
+    valid_indices = pred_scores > score_thr
+    pred_scores = pred_scores[valid_indices]
+    pred_points = pred_points[valid_indices]
 
     pred_hm = put_colorized_points(height, width, pred_points, pred_scores)
     pred_color = alpha_blend(color, pred_hm, None)

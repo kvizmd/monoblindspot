@@ -2,8 +2,6 @@
 
 The official implementation of [Monocular Blind Spot Estimation with Occupancy Grid Mapping](https://doi.org/10.23919/MVA57639.2023.10215609).
 
-**Please note that some re-implementations are included due to licensing issues.**
-
 [![test](https://github.com/kvizmd/monoblindspot/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/kvizmd/monoblindspot/actions/workflows/test.yml)
 
 ## Installation

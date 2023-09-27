@@ -40,7 +40,7 @@ MODEL:
     ENABLED: True
     NAME: 'dla_iam'
     NUM_LAYERS: 34
-    INSTANCES: 64
+    INSTANCES: 100
     DOWN_RATIO: 8
 
 LOSS:
