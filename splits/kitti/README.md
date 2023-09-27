@@ -212,7 +212,7 @@ Export a depth map of the ground using the following script.
 ```shell
 $ python export_ground_depth.py \
     --data_dir /path/to/kitti \
-    --split splits/bs/val_files.txt \
+    --split splits/kitti/bs/val_files.txt \
     --out_dir /path/to/output \
     --device cuda:0
 ```
