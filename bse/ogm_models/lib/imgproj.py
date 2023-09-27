@@ -140,7 +140,7 @@ class ImageProjector(torch.nn.Module):
 
         In order to obtain a robustly sampled mask, an expanded
         sampling is performed. However, there is no guarantee that
-        the center of the OGM matches the center of the road, so
+        the horizontal center of the OGM matches the center of the road, so
         expansion is performed on both sides.
         """
 
@@ -149,23 +149,22 @@ class ImageProjector(torch.nn.Module):
 
         ogm_points, N = ogm.create_grid_coords()
 
-        # To reduce quantization error
         ogm_points_1 = ogm_points.view(batch_size, 3, N, N)
         ogm_points_2 = ogm_points_1.clone()
 
-        # Internal over-sampling
+        # Reduce quantization error by over-sampling in the center direction.
         ogm_points_1[..., :N // 2] += self.sample_left_offset.view(1, 3, 1, 1)
         ogm_points_1[..., N // 2:] += self.sample_right_offset.view(1, 3, 1, 1)
         ogm_points_1 = ogm_points_1.view(batch_size, 3, -1)
 
-        # External over-sampling
+        # Reduce quantization error by over-sampling in the outside direction.
         ogm_points_2[..., :N // 2] -= self.sample_left_offset.view(1, 3, 1, 1)
         ogm_points_2[..., N // 2:] -= self.sample_right_offset.view(1, 3, 1, 1)
         ogm_points_2 = ogm_points_2.view(batch_size, 3, -1)
 
         ogm_points = torch.cat((ogm_points_1, ogm_points_2), dim=2)
 
-        # Scaled Grid -> Grid -> Point Cloud -> Image
+        # Grid -> Point Cloud -> Image
         cam_points = transform_point_cloud(T_ogm2cam, ogm_points)
         img_points = project_to_2d(cam_points, K)
 
@@ -180,6 +179,7 @@ class ImageProjector(torch.nn.Module):
         sampling_mask_1 = sampling_mask.gather(1, sampler_1)
         sampling_mask_2 = sampling_mask.gather(1, sampler_1)
 
+        # Merge masks
         sampling_mask = sampling_mask_1 | sampling_mask_2
         img_range_mask = img_range_mask_1 & img_range_mask_2
 
