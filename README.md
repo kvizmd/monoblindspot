@@ -127,8 +127,8 @@ Please specify the configuration file used during training with the `--config` o
 ```shell
 $ python infer.py \
     --config configs/bs_kitti_dla34_iam_s8.yaml \
-    --opts MODEL.BS.WEIGHT bs.pth
-    --input input.jpg \
+    --opts MODEL.BS.WEIGHT /path/to/bs.pth
+    --input /path/to/input.jpg \
     --out_dir outputs/predictions
 ```
 
