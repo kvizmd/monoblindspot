@@ -133,12 +133,12 @@ $ python infer.py \
 ```
 
 ## Models
-The checkpoints are coming soon.
+For code compatibility, these are newly trained weights, not those used in the experiments in the paper.
 
 |**Model**|**FPS**|**Parameter (M)**|**Link**|
 |:---:|:---:|:---:|:---:|
-|Resnet18-SparseInst-IAM|124.4|16.60|download|
-|DLA34-IAM|72.6|21.07|download|
+|Resnet18-SparseInst-IAM|244.05|16.68|[Download](https://drive.google.com/file/d/15oKG_XRkjRdzlPNmyytk6WtfpCpV4djH/view?usp=sharing)|
+|DLA34-IAM|127.52|21.15|[Download](https://drive.google.com/file/d/1VtUBXWXfNfqWcd0f_s0Yw6a2K4I3qqPp/view?usp=sharing)|
 
 **FPS** was measured on NVIDIA TITAN V with `torch.backends.cudnn.benchmark` enabled.
 
