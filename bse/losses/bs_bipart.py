@@ -87,7 +87,7 @@ class BipartCriterion(Criterion):
             gt_num = gt_indices.numel()
             if gt_num == 0:
                 gt_cls_score = torch.zeros(Npred).to(pred_cls_score)
-                losses['cls_loss'] += 0.01 * self.cls_loss(
+                losses['cls_loss'] += 0.1 * self.cls_loss(
                     pred_cls_score, gt_cls_score.detach())
                 continue
 
@@ -97,7 +97,6 @@ class BipartCriterion(Criterion):
             gt_cls_score = F.one_hot(
                 pred_indices, Npred).amax(0).to(pred_cls_score)
             cls_confidence = torch.ones_like(gt_cls_score)
-            # cls_confidence = torch.full_like(gt_cls_score, 0.5)
             cls_confidence[pred_indices] = gt_occ_score
             losses['cls_loss'] += self.cls_loss(
                 pred_cls_score, gt_cls_score.detach(),
