@@ -173,7 +173,7 @@ def generate_ground_depth(
         sample_num = max_trial
         ground_depths = torch.stack(ground_depth_list)
 
-        # To evaluate the quolity of the ground depth map, calculate abs-rel.
+        # To evaluate the quality of the ground depth map, calculate abs-rel.
         depth = depth.view(-1)
         depth_errors = torch.abs(
             ground_depths[:, mask] - depth[mask]) / depth[mask]
