@@ -154,10 +154,11 @@ $ python -m unittest discover tests
 ## Citation
 If our project is useful for your research, please consider citing our paper.
 ```bibtex
-@inproceedings{odagiri2023bse,
+@inproceedings{odagiri2023monobse,
   title={Monocular Blind Spot Estimation with Occupancy Grid Mapping},
   author={Kazuya, Odagiri and Kazunori, Onoguchi},
   booktitle={International Conference on Machine Vision and Applications, {MVA}},
+  pages={1--6},
   year={2023},
   organization={IEEE}
 }
