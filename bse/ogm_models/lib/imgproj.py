@@ -38,10 +38,10 @@ class ImageProjector(torch.nn.Module):
             requires_grad=False)
 
         self.sample_left_offset = nn.Parameter(
-            torch.tensor([2.0, 0, 0.0], dtype=torch.float32),
+            torch.tensor([2.0, 0, 1.0], dtype=torch.float32),
             requires_grad=False)
         self.sample_right_offset = nn.Parameter(
-            torch.tensor([-1.0, 0, 0.0], dtype=torch.float32),
+            torch.tensor([-1.0, 0, 1.0], dtype=torch.float32),
             requires_grad=False)
 
     def forward(
@@ -149,39 +149,23 @@ class ImageProjector(torch.nn.Module):
 
         ogm_points, N = ogm.create_grid_coords()
 
-        ogm_points_1 = ogm_points.view(batch_size, 3, N, N)
-        ogm_points_2 = ogm_points_1.clone()
+        ogm_points = ogm_points.view(batch_size, 3, N, N)
 
         # Reduce quantization error by over-sampling in the center direction.
-        ogm_points_1[..., :N // 2] += self.sample_left_offset.view(1, 3, 1, 1)
-        ogm_points_1[..., N // 2:] += self.sample_right_offset.view(1, 3, 1, 1)
-        ogm_points_1 = ogm_points_1.view(batch_size, 3, -1)
-
-        # Reduce quantization error by over-sampling in the outside direction.
-        ogm_points_2[..., :N // 2] -= self.sample_left_offset.view(1, 3, 1, 1)
-        ogm_points_2[..., N // 2:] -= self.sample_right_offset.view(1, 3, 1, 1)
-        ogm_points_2 = ogm_points_2.view(batch_size, 3, -1)
-
-        ogm_points = torch.cat((ogm_points_1, ogm_points_2), dim=2)
+        ogm_points[..., :N // 2] += self.sample_left_offset.view(1, 3, 1, 1)
+        ogm_points[..., N // 2:] += self.sample_right_offset.view(1, 3, 1, 1)
+        ogm_points = ogm_points.view(batch_size, 3, -1)
 
         # Grid -> Point Cloud -> Image
         cam_points = transform_point_cloud(T_ogm2cam, ogm_points)
         img_points = project_to_2d(cam_points, K)
 
         # Divide into the two sampler
-        img_points = img_points.view(batch_size, 2, 2, -1)
-        sampler_1, img_range_mask_1 = \
-            convert_to_sampler(img_points[:, :, 0], height, width)
-        sampler_2, img_range_mask_2 = \
-            convert_to_sampler(img_points[:, :, 1], height, width)
+        sampler, img_range_mask = \
+            convert_to_sampler(img_points, height, width)
 
         sampling_mask = sampling_mask.view(batch_size, -1)
-        sampling_mask_1 = sampling_mask.gather(1, sampler_1)
-        sampling_mask_2 = sampling_mask.gather(1, sampler_1)
-
-        # Merge masks
-        sampling_mask = sampling_mask_1 | sampling_mask_2
-        img_range_mask = img_range_mask_1 & img_range_mask_2
+        sampling_mask = sampling_mask.gather(1, sampler)
 
         mask = img_range_mask & sampling_mask
         mask = mask.view(batch_size, 1, N, N)

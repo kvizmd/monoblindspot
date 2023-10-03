@@ -5,3 +5,5 @@ from .generator_bs import BlindSpotGenerator
 
 from .evaluator_depth import DepthEvaluator
 from .evaluator_bs import BlindSpotEvaluator
+
+from .runner import create_parallel_run

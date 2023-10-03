@@ -25,4 +25,5 @@ from .runners import \
     DepthEvaluator, \
     BlindSpotGenerator, \
     BlindSpot2DTrainer, \
-    BlindSpotEvaluator
+    BlindSpotEvaluator, \
+    create_parallel_run

@@ -18,27 +18,32 @@ class BlindSpotGenerator(Runner):
             cfg,
             dataset: Dataset,
             integrator: OGMIntegrator,
-            exporter: Exporter):
-        super().__init__(cfg)
+            exporter: Exporter,
+            **kwargs):
+        super().__init__(cfg, **kwargs)
 
         self.max_epochs = cfg.TRAIN.MAX_EPOCHS
         self.batch_size = cfg.DATA.BATCH_SIZE
+        self.figsave_iter = cfg.TRAIN.FIGSAVE_ITER
 
         self.exporter = exporter
 
-        self.figsave_iter = cfg.TRAIN.FIGSAVE_ITER
+        self.integrator = integrator
+        self.integrator.to(self.device)
+        self.integrator = self.convert_parallel_model(self.integrator)
 
         if len(dataset) % self.batch_size != 0:
             raise RuntimeError(
                 'The batch size ({}) must be divisible by the number of '
                 'data ({}).'.format(self.batch_size, len(dataset)))
+
+        sampler = self.build_parallel_sampler(
+            dataset, shuffle=False, drop_last=False)
         self.dataloader = DataLoader(
             dataset, batch_size=self.batch_size,
             shuffle=False, num_workers=cfg.NUM_WORKERS,
-            pin_memory=True, drop_last=False, worker_init_fn=seed_worker)
-
-        self.integrator = integrator
-        self.integrator.to(self.device)
+            pin_memory=True, drop_last=False, worker_init_fn=seed_worker,
+            sampler=sampler)
 
     def entry(self):
         with tqdm(

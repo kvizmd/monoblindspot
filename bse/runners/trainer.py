@@ -5,7 +5,6 @@ import numpy as np
 from tqdm import tqdm
 
 import torch
-from torch import nn
 from torch.utils.data import DataLoader
 
 import mlflow
@@ -23,8 +22,13 @@ class Trainer(Runner):
             cfg,
             datasets: dict,
             models: dict,
-            criterions: dict):
-        super().__init__(cfg)
+            criterions: dict,
+            **kwargs):
+        super().__init__(cfg, **kwargs)
+
+        if self.is_parallel:
+            raise NotImplementedError('Not support parallel training yet.')
+
         self.max_epochs = cfg.TRAIN.MAX_EPOCHS
         self.batch_size = cfg.DATA.BATCH_SIZE
         self.height = cfg.DATA.IMG_HEIGHT
@@ -59,12 +63,6 @@ class Trainer(Runner):
             self.models[key].train()
             self.models[key].to(self.device)
 
-        if self.cfg.MULTI_GPU \
-                and torch.cuda.device_count() > 1 \
-                and 'cuda' in self.device.lower():
-            for key in self.models.keys():
-                self.models = nn.DataParallel(self.models[key])
-
         self.crits = criterions
         for key in self.crits.keys():
             self.crits[key].to(self.device)
@@ -93,13 +91,11 @@ class Trainer(Runner):
             'train': DataLoader(
                 datasets['train'], batch_size=cfg.DATA.BATCH_SIZE,
                 shuffle=not cfg.DATA.NO_SHUFFLE, num_workers=cfg.NUM_WORKERS,
-                pin_memory=True, drop_last=True,
-                worker_init_fn=seed_worker),
+                pin_memory=True, drop_last=True, worker_init_fn=seed_worker),
             'val': DataLoader(
                 datasets['val'], batch_size=cfg.DATA.BATCH_SIZE,
                 shuffle=not cfg.DATA.NO_SHUFFLE, num_workers=cfg.NUM_WORKERS,
-                pin_memory=True, drop_last=True,
-                worker_init_fn=seed_worker)
+                pin_memory=True, drop_last=True, worker_init_fn=seed_worker),
         }
 
     def get_float_epoch(self, epoch: int, iteration: int) -> float:
