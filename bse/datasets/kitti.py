@@ -39,13 +39,6 @@ class KITTIDataset(Dataset):
 
         self.dummy_depth_full = torch.zeros(
             [1] + list(self.full_res_shape[::-1]), dtype=torch.float32)
-
-        self.dummy_depth = {}
-        for i in range(self.num_scales):
-            s = 2 ** i
-            h, w = self.height // s, self.width // s
-            self.dummy_depth[i] = torch.zeros((1, h, w), dtype=torch.float32)
-
         self.dummy_pose = torch.eye(4, dtype=torch.float32)
 
         self.use_calib_intrinsic = True
