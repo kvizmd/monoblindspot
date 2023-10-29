@@ -261,11 +261,6 @@ def evaluate_blindspot(
       depth_ranges:
       threshold:
     """
-    Np = pred_points.shape[0]
-    Ng = gt_points.shape[0]
-    if Np == 0:
-        return {'FN': Ng}
-
     pred_bss = project_to_campoints(
         pred_points, depth, inv_K, ignore_zero_depth=True)
 
