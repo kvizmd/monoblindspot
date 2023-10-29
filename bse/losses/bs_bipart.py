@@ -87,7 +87,7 @@ class BipartCriterion(Criterion):
             gt_num = gt_indices.numel()
             if gt_num == 0:
                 gt_cls_score = torch.zeros(Npred).to(pred_cls_score)
-                losses['cls_loss'] += 0.1 * self.cls_loss(
+                losses['cls_loss'] += 0.5 * self.cls_loss(
                     pred_cls_score, gt_cls_score.detach())
                 continue
 
@@ -96,7 +96,7 @@ class BipartCriterion(Criterion):
             # Instance loss
             gt_cls_score = F.one_hot(
                 pred_indices, Npred).amax(0).to(pred_cls_score)
-            cls_confidence = torch.ones_like(gt_cls_score)
+            cls_confidence = torch.full_like(gt_cls_score, 0.5)
             cls_confidence[pred_indices] = gt_occ_score
             losses['cls_loss'] += self.cls_loss(
                 pred_cls_score, gt_cls_score.detach(),
@@ -105,10 +105,10 @@ class BipartCriterion(Criterion):
             # 2D position loss
             pred_point = outputs['bs_point', 0, 0][b][pred_indices]
             gt_point = outputs['bs_point_gen', 0, 0][b][gt_indices].detach()
-            pos_2d_loss = self.pos_2d_loss(pred_point, gt_point).mean(-1)
+            pos_2d_loss = self.pos_2d_loss(pred_point, gt_point).sum(-1)
             if self.occ_weighting:
                 pos_2d_loss *= gt_occ_score
-            losses['pos_2d_loss'] += pos_2d_loss.mean()
+            losses['pos_2d_loss'] += pos_2d_loss.sum() / gt_num
 
         losses['loss'] = 0
         for key in losses.keys():
