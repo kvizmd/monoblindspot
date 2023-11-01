@@ -92,7 +92,7 @@ class ImageProjector(torch.nn.Module):
         peak_cells = [stack_list(c) for c in peak_cells]
         peak_probs = [stack_list(p) for p in peak_probs]
         peak_img_points = [
-            torch.tensor([], **factory_args) for _ in range(batch_size)]
+            torch.empty(0, 2, **factory_args) for _ in range(batch_size)]
 
         nums = [len(cell) for cell in peak_cells]
         total_num = int(torch.tensor(nums, **factory_args).sum())
