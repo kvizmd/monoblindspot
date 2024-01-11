@@ -1,4 +1,4 @@
-FROM nvidia/cuda:11.2.1-devel-ubuntu20.04
+FROM nvidia/cuda:11.2.2-devel-ubuntu20.04
 
 ENV DEBCONF_NOWARNINGS=yes
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
