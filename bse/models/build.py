@@ -1,11 +1,8 @@
 from .depth import DepthNet
 from .pose import PoseNet
 from .bs import BSNetBase
-from .encoders import \
-    ResNetEncoder, \
-    DLAEncoder, \
-    SparseInstEncoder
-from .bs_detectors import IAMDetector
+from . import encoders
+from . import bs_detectors
 
 
 def build_model(cfg):
@@ -31,13 +28,14 @@ def build_model(cfg):
             enc_key, num_layers, dec_key))
 
         bs_encoder = {
-            'resnet': ResNetEncoder,
-            'dla': DLAEncoder,
-            'sparseinst': SparseInstEncoder
+            'resnet': encoders.ResNetEncoder,
+            'dla': encoders.DLAEncoder,
+            'sparseinst': encoders.SparseInstEncoder
         }[enc_key]
 
         bs_detector = {
-            'iam': IAMDetector,
+            'iam': bs_detectors.IAMDetector,
+            'heatmap': bs_detectors.HeatmapDetector,
         }[dec_key]
 
         models['bs'] = BSNetBase(
@@ -45,6 +43,7 @@ def build_model(cfg):
             inst_num=cfg.MODEL.BS.INSTANCES,
             down_ratio=cfg.MODEL.BS.DOWN_RATIO,
             prior_prob=cfg.MODEL.BS.PRIOR_PROB,
+            score_threshold=cfg.EVAL.BS.SCORE_THRESHOLD,
             group_num=cfg.MODEL.BS.GROUPS,
             group_norm=cfg.MODEL.BS.GROUP_NORM,
             deform_conv=cfg.MODEL.BS.DEFORMABLE)

@@ -6,6 +6,8 @@ six
 tqdm
 yacs
 scikit-image
+ninja
+nuscenes-devkit
+git+https://github.com/cdiazruiz/ithaca365-devkit.git
 # PyQt5
-# nuscenes-devkit
 # mayavi

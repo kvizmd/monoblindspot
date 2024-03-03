@@ -204,10 +204,19 @@ def ignore_on_mask(points: torch.Tensor, mask: torch.Tensor) -> torch.Tensor:
         return points
 
     H, W = mask.shape[-2:]
-    y_idx = (points[:, 0] * (H - 1)).long()
-    x_idx = (points[:, 1] * (W - 1)).long()
+
+    perspective_mask = \
+        (points[:, 0] >= 0.0) \
+        & (points[:, 0] <= 1.0) \
+        & (points[:, 1] >= 0.0) \
+        & (points[:, 1] <= 1.0)
+
+    y_idx = (points[:, 0].clamp(min=0.0, max=1.0) * (H - 1)).long()
+    x_idx = (points[:, 1].clamp(min=0.0, max=1.0) * (W - 1)).long()
     ignore_mask = mask.view(-1)[x_idx + W * y_idx]
-    return points.view(-1, 2)[~ignore_mask]
+
+    mask = (~ignore_mask) & perspective_mask
+    return points.view(-1, 2)[mask]
 
 
 def project_to_campoints(

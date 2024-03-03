@@ -8,10 +8,11 @@ from bse.utils.metric import \
     ignore_negative, \
     ignore_on_mask, \
     evaluate_blindspot
-from bse.ogm_models import OGMIntegrator
 
 from .evaluator import Evaluator
-from .figure import make_bsgen_figure, make_bs_figure
+from .figure import \
+    make_bsgen_figure, \
+    make_bs_figure
 
 
 class BlindSpotEvaluator(Evaluator):
@@ -38,18 +39,36 @@ class BlindSpotEvaluator(Evaluator):
 
         self.data_dir = self.dataloader.dataset.data_path
 
-        self.is_generator = isinstance(self.model, OGMIntegrator)
+        self.get_model_args = self.build_model_feeder()
+        self.make_figure = self.build_figure_maker()
+
+    def build_model_feeder(self):
+        if 'gen' in self.cfg.TARGET_MODE.lower():
+            return lambda inputs: (inputs,)
+        return lambda inputs: (inputs['color', 0, 0],)
+
+    def build_figure_maker(self):
+        if 'gen' in self.cfg.TARGET_MODE.lower():
+            return make_bsgen_figure
+
+        return make_bs_figure
 
     def predict(self, inputs: dict) -> dict:
-        if self.is_generator:
-            outputs = self.model(inputs)
-        else:
-            outputs = self.model(inputs['color', 0, 0])
+        return self.model(*self.get_model_args(inputs))
 
-        return outputs
+    def save_figure(self, inputs: dict, outputs: dict, basename: str):
+        with self.make_figure(inputs, outputs, score_thr=0.1) as fig:
+            mlflow.log_figure(
+                fig, basename + '_{}.jpg'.format(self.ml_run.info.run_id))
 
     def evaluate(self, inputs: dict, outputs: dict, iter_idx: int) -> dict:
         out_metrics = defaultdict(int)
+
+        if 'bs_gt' not in inputs:
+            print(
+                'Warning: \"' + inputs['filename'][0]
+                + '\" does not have annotation!!')
+            return out_metrics
 
         for b in range(self.batch_size):
             gt_point = inputs['bs_gt'][b]  # shape: N x 2
@@ -96,11 +115,3 @@ class BlindSpotEvaluator(Evaluator):
                 out_metrics[key + '/' + _k] = _v
 
         return out_metrics
-
-    def save_figure(self, inputs: dict, outputs: dict, basename: str):
-        if self.is_generator:
-            with make_bsgen_figure(inputs, outputs) as fig:
-                mlflow.log_figure(fig, basename + '_bsgen.jpg')
-        else:
-            with make_bs_figure(inputs, outputs) as fig:
-                mlflow.log_figure(fig, basename + '_bs.jpg')

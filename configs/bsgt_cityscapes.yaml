@@ -1,0 +1,18 @@
+_BASE_: 'configs/bsgt_default.yaml'
+NUM_WORKERS: 2
+
+DATA:
+  NAME: 'Cityscapes'
+  TRAIN_SPLIT: 'splits/cityscapes/bs/train_files.txt'
+  VAL_SPLIT: 'splits/cityscapes/bs/val_files.txt'
+  TEST_SPLIT: 'splits/cityscapes/bs/test_files.txt'
+
+  BATCH_SIZE: 1
+  IMG_HEIGHT: 192
+  IMG_WIDTH: 640
+
+  FRAME_IDXS: [
+     0, -8, -6, -4, -2,
+     2,  4,  6,  8,  10,
+    12, 14, 16, 18, 20,
+    22, 24, 26, 28, 30]

@@ -1,12 +1,26 @@
 import torch
 import torch.nn as nn
-from torch.nn import functional as F
 
-from .layer import ELUBlock, Conv3x3
+from bse.models.layers import Upsample, RefrectConv
+
+
+class ELUBlock(nn.Module):
+    def __init__(self, in_channels, out_channels):
+        super().__init__()
+        self.conv = RefrectConv(in_channels, out_channels)
+        self.nonlin = nn.ELU(inplace=True)
+
+    def forward(self, x):
+        out = self.conv(x)
+        out = self.nonlin(out)
+        return out
 
 
 class DepthDecoder(nn.Module):
-    def __init__(self, num_ch_enc: list, scales: list = list(range(4))):
+    def __init__(
+            self,
+            num_ch_enc: list,
+            scales: list = list(range(4))):
         super().__init__()
         self.scales = scales
         e1, e2, e3, e4, e5 = num_ch_enc[-5:]
@@ -27,39 +41,39 @@ class DepthDecoder(nn.Module):
         self.conv5 = ELUBlock(d2, d1)
         self.node5 = ELUBlock(d1, d1)
 
-        self.disp1 = Conv3x3(d4, 1)
-        self.disp2 = Conv3x3(d3, 1)
-        self.disp3 = Conv3x3(d2, 1)
-        self.disp4 = Conv3x3(d1, 1)
+        self.disp1 = nn.Sequential(RefrectConv(d4, 1), nn.Sigmoid())
+        self.disp2 = nn.Sequential(RefrectConv(d3, 1), nn.Sigmoid())
+        self.disp3 = nn.Sequential(RefrectConv(d2, 1), nn.Sigmoid())
+        self.disp4 = nn.Sequential(RefrectConv(d1, 1), nn.Sigmoid())
 
-        self.interp_mode = 'nearest'
+        self.upsample = Upsample(scale_factor=2, mode='nearest')
 
     def forward(self, input_features: list) -> dict:
         outputs = {}
         e1, e2, e3, e4, e5 = input_features[-5:]
 
         x = self.conv1(e5)
-        x = F.interpolate(x, scale_factor=2, mode=self.interp_mode)
+        x = self.upsample(x)
         x = self.node1(torch.cat((x, e4), dim=1))
 
         x = self.conv2(x)
-        x = F.interpolate(x, scale_factor=2, mode=self.interp_mode)
+        x = self.upsample(x)
         x = self.node2(torch.cat((x, e3), dim=1))
-        outputs['disp', 3] = self.disp1(x).sigmoid()
+        outputs['disp', 3] = self.disp1(x)
 
         x = self.conv3(x)
-        x = F.interpolate(x, scale_factor=2, mode=self.interp_mode)
+        x = self.upsample(x)
         x = self.node3(torch.cat((x, e2), dim=1))
-        outputs['disp', 2] = self.disp2(x).sigmoid()
+        outputs['disp', 2] = self.disp2(x)
 
         x = self.conv4(x)
-        x = F.interpolate(x, scale_factor=2, mode=self.interp_mode)
+        x = self.upsample(x)
         x = self.node4(torch.cat((x, e1), dim=1))
-        outputs['disp', 1] = self.disp3(x).sigmoid()
+        outputs['disp', 1] = self.disp3(x)
 
         x = self.conv5(x)
-        x = F.interpolate(x, scale_factor=2, mode=self.interp_mode)
+        x = self.upsample(x)
         x = self.node5(x)
-        outputs['disp', 0] = self.disp4(x).sigmoid()
+        outputs['disp', 0] = self.disp4(x)
 
         return outputs

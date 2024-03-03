@@ -1,0 +1,24 @@
+_BASE_: 'configs/depth_default.yaml'
+
+DATA:
+  NAME: 'ithaca'
+  TRAIN_SPLIT: 'splits/ithaca365/train_files.txt'
+  VAL_SPLIT: 'splits/ithaca365/val_files.txt'
+  TEST_SPLIT: 'splits/ithaca365/val_files.txt'
+
+  BATCH_SIZE: 10
+  IMG_HEIGHT: 192
+  IMG_WIDTH: 640
+
+TRAIN:
+  MAX_EPOCHS: 30
+  LR_MILESTONES: [20, 25]
+  WARMUP_ITERS: 1000
+  LOGGING_ITER: 1000
+  FIGSAVE_ITER: 1000
+
+  DEPTH:
+    LR: 0.0001
+
+  POSE:
+    LR: 0.0001

@@ -110,16 +110,31 @@ class OGMIntegrator(nn.Module):
     def forward(self, inputs: dict) -> dict:
         outputs = self.integrate(inputs)
 
+        ogm = outputs['OGM', 0]
+        T_ogm2cam = outputs['T_ogm2cam', 0]
+
         points, probs, peak_cells = self.ogm2img(
-            outputs['OGM', 0],
+            ogm,
             outputs['sampling_mask', 0],
             inputs['K', 0],
-            outputs['T_ogm2cam', 0])
+            T_ogm2cam)
 
         outputs.update({
             ('bs_point', 0): points,
             ('bs_confidence', 0): probs,
-            ('bs_peak_cell', 0): peak_cells
+        })
+
+        # The transformation matrix and the peak cell coordinates are
+        # normalized with the grid size (e.g. 128).
+        T_norm2ogm = torch.eye(4, dtype=ogm.dtype, device=ogm.device)
+        T_norm2ogm[:3, :3] *= ogm.size
+        T_norm2cam = torch.matmul(T_ogm2cam, T_norm2ogm.view(1, 4, 4))
+
+        peak_cells = [c / (ogm.size - 1) for c in peak_cells]
+
+        outputs.update({
+            ('T_norm2cam', 0): T_norm2cam,
+            ('bs_peak_cell', 0): peak_cells,
         })
 
         return outputs

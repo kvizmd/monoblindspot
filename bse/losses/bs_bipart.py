@@ -10,12 +10,12 @@ from .util import bipartite_match
 class BipartCriterion(Criterion):
     def __init__(
             self,
-            factor=1.0,
-            cls_factor=1.0,
-            pos_2d_factor=1.0,
-            score_match=1.0,
-            pos_match=1.0,
-            occ_weighting=True,
+            factor: float = 1.0,
+            cls_factor: float = 1.0,
+            pos_2d_factor: float = 1.0,
+            score_match: float = 1.0,
+            pos_match: float = 1.0,
+            occ_weighting: bool = True,
             **kwargs):
         super().__init__(factor)
 
@@ -28,17 +28,20 @@ class BipartCriterion(Criterion):
 
         self.factor = factor
 
-        self.cls_loss = FocalLoss(alpha=0.25, gamma=2)
+        self.focal_alpha = 0.25
+        self.focal_gamma = 2
+        self.cls_loss = FocalLoss(
+            alpha=self.focal_alpha, gamma=self.focal_gamma)
         self.pos_2d_loss = nn.L1Loss(reduction='none')
 
         self.occ_weighting = occ_weighting
 
-    def match(self, inputs, outputs):
+    def match(self, inputs: dict, outputs: dict, s_idx: int = 0):
         # Confidence score
-        pred_score = outputs['bs_confidence', 0, 0]
+        pred_score = outputs['bs_confidence', 0, s_idx]
 
         # 2D position
-        pred_point = outputs['bs_point', 0, 0]
+        pred_point = outputs['bs_point', 0, s_idx]
         gt_point = outputs['bs_point_gen', 0, 0]
 
         # Compute the number of prediction and ground-truth.
@@ -69,46 +72,97 @@ class BipartCriterion(Criterion):
         pred_point = reshape_pred(pred_point)
         gt_point = reshape_gt(gt_point)
 
-        pos_err = self.pos_2d_loss(pred_point, gt_point).mean(-1, True)
+        # match_cost = self._compute_matching_costs_detr(
+        #    pred_score, pred_point, gt_point)
+        match_cost = self._compute_matching_costs_sparseinst(
+            pred_score, pred_point, gt_point)
+        match_cost = match_cost.view(B, Npred, -1)
+        return bipartite_match(match_cost, gt_nums, maximize=False)
+
+    def _compute_matching_costs_sparseinst(
+            self,
+            pred_score,
+            pred_point_2d,
+            gt_point_2d):
+        pos_cost_2d = self.pos_2d_loss(
+            pred_point_2d, gt_point_2d).mean(-1, True)
 
         match_score = \
             pred_score ** self.factors['score_match'] \
-            * (1 - pos_err) ** self.factors['pos_match']
+            * (1 - pos_cost_2d).clamp(min=0) ** self.factors['pos_match']
 
-        match_score = match_score.view(B, Npred, -1)
-        return bipartite_match(match_score, gt_nums, maximize=True)
+        return -match_score
+
+    def _compute_matching_costs_detr(
+            self,
+            pred_score,
+            pred_point_2d,
+            gt_point_2d):
+
+        pos_score_cost = \
+            self.focal_alpha \
+            * ((1 - pred_score) ** self.focal_gamma) \
+            * (-torch.log(pred_score + 1e-8))
+        neg_score_cost = \
+            (1 - self.focal_alpha) \
+            * (pred_score ** self.focal_gamma) \
+            * (-torch.log(1 - pred_score + 1e-8))
+        score_cost = pos_score_cost - neg_score_cost
+
+        pos_cost_2d = self.pos_2d_loss(
+            pred_point_2d, gt_point_2d).sum(-1, True)
+
+        match_cost = \
+            self.factors['cls_loss'] * score_cost \
+            + self.factors['pos_2d_loss'] * pos_cost_2d
+
+        return match_cost
 
     def compute_losses(self, inputs, outputs, losses):
-        Npred = outputs['bs_confidence', 0, 0].shape[1]
-        bipart_indices = self.match(inputs, outputs)
-        for b, (pred_indices, gt_indices) in enumerate(bipart_indices):
-            pred_cls_score = outputs['bs_confidence', 0, 0][b]
+        s_indices = []
+        for key in outputs.keys():
+            if key[0] == 'bs_confidence':
+                s_indices.append(int(key[-1]))
 
-            gt_num = gt_indices.numel()
-            if gt_num == 0:
-                gt_cls_score = torch.zeros(Npred).to(pred_cls_score)
-                losses['cls_loss'] += 0.5 * self.cls_loss(
-                    pred_cls_score, gt_cls_score.detach())
-                continue
+        for s_idx in s_indices:
+            s_confidence = 1 / 2 ** s_idx
 
-            gt_occ_score = outputs['bs_confidence_gen', 0, 0][b][gt_indices]
+            Npred = outputs['bs_confidence', 0, s_idx].shape[1]
 
-            # Instance loss
-            gt_cls_score = F.one_hot(
-                pred_indices, Npred).amax(0).to(pred_cls_score)
-            cls_confidence = torch.full_like(gt_cls_score, 0.5)
-            cls_confidence[pred_indices] = gt_occ_score
-            losses['cls_loss'] += self.cls_loss(
-                pred_cls_score, gt_cls_score.detach(),
-                weight=cls_confidence if self.occ_weighting else None)
+            bipart_indices = self.match(inputs, outputs)
 
-            # 2D position loss
-            pred_point = outputs['bs_point', 0, 0][b][pred_indices]
-            gt_point = outputs['bs_point_gen', 0, 0][b][gt_indices].detach()
-            pos_2d_loss = self.pos_2d_loss(pred_point, gt_point).sum(-1)
-            if self.occ_weighting:
-                pos_2d_loss *= gt_occ_score
-            losses['pos_2d_loss'] += pos_2d_loss.sum() / gt_num
+            for b, (pred_indices, gt_indices) in enumerate(bipart_indices):
+                pred_cls_score = outputs['bs_confidence', 0, s_idx][b]
+
+                gt_num = gt_indices.numel()
+                if gt_num == 0:
+                    gt_cls_score = torch.zeros(Npred).to(pred_cls_score)
+                    losses['cls_loss'] += s_confidence * 0.5 * self.cls_loss(
+                        pred_cls_score, gt_cls_score.detach())
+                    continue
+
+                gt_occ_score = \
+                    outputs['bs_confidence_gen', 0, 0][b][gt_indices]
+
+                # Instance loss
+                gt_cls_score = F.one_hot(
+                    pred_indices, Npred).amax(0).to(pred_cls_score)
+                cls_confidence = torch.full_like(gt_cls_score, 0.5)  # Unknown
+                cls_confidence[pred_indices] = gt_occ_score
+                losses['cls_loss'] += s_confidence * self.cls_loss(
+                    pred_cls_score, gt_cls_score.detach(),
+                    weight=cls_confidence if self.occ_weighting else None)
+
+                # 2D position loss
+                pred_point = \
+                    outputs['bs_point', 0, s_idx][b][pred_indices]
+                gt_point = \
+                    outputs['bs_point_gen', 0, 0][b][gt_indices].detach()
+                pos_2d_loss = self.pos_2d_loss(pred_point, gt_point).sum(-1)
+                if self.occ_weighting:
+                    pos_2d_loss *= gt_occ_score
+                pos_2d_loss = pos_2d_loss.sum() / gt_num
+                losses['pos_2d_loss'] += s_confidence * pos_2d_loss
 
         losses['loss'] = 0
         for key in losses.keys():

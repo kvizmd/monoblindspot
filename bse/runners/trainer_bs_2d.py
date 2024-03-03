@@ -12,11 +12,11 @@ class BlindSpot2DTrainer(BlindSpotTrainer):
     def build_optimizer(self, cfg, models: dict) -> torch.optim.Optimizer:
         param_lr_table = [
             {
-                'params': models['bs'].encoder.parameters(),
+                'params': self.get_model_module('bs').encoder.parameters(),
                 'lr': cfg.TRAIN.BS.ENCODER_LR,
             },
             {
-                'params': models['bs'].decoder.parameters(),
+                'params': self.get_model_module('bs').decoder.parameters(),
                 'lr': cfg.TRAIN.BS.DECODER_LR,
             }
         ]
@@ -30,7 +30,6 @@ class BlindSpot2DTrainer(BlindSpotTrainer):
 
     def process_batch(self, inputs: dict) -> dict:
         outputs = {}
-        self.load_offline_label(inputs, outputs)
 
         bs_outputs = self.models['bs'](inputs['color_aug', 0, 0])
         for key in bs_outputs.keys():

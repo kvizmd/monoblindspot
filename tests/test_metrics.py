@@ -106,7 +106,11 @@ class TestPointFiltering(unittest.TestCase):
         x = torch.tensor([
             [0.5, 0.2],
             [0.1, 0.2],
-            [0.2, 0.3]], dtype=torch.float32)
+            [0.2, 0.3],
+            [-0.1, 0.2],
+            [1.2, 0.3],
+            [0.2, -0.1],
+            [0.3, 1.5]], dtype=torch.float32)
 
         mask = torch.zeros((1, 10, 10), dtype=torch.bool)
         mask[..., :4, :] = True

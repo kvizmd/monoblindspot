@@ -29,11 +29,16 @@ class Evaluator(Runner):
             shuffle=False, num_workers=cfg.NUM_WORKERS,
             pin_memory=True, drop_last=False, worker_init_fn=seed_worker)
 
-        self.model = model
-        self.model.eval()
-        self.model.to(self.device)
+        self.model = self.setup_model(model)
 
-        self.runtime_warmup = 20
+        self.runtime_warmup = 30
+
+        self.is_evaluable = True
+
+    def setup_model(self, model):
+        model.eval()
+        model.to(self.device)
+        return model
 
     def predict(self, inputs: dict) -> dict:
         raise NotImplementedError()
@@ -50,6 +55,13 @@ class Evaluator(Runner):
 
     @torch.inference_mode()
     def entry(self) -> dict:
+        params = 0
+        for p in self.model.parameters():
+            if p.requires_grad:
+                params += p.numel()
+        self._print('Parameters: {:.2f} M'.format(params / 1e6))
+        self.log_metric('params', params)
+
         all_metrics = defaultdict(list)
         infer_sec = []
         with tqdm(
@@ -75,15 +87,16 @@ class Evaluator(Runner):
                     elapsed_time = time.time() - start
                     infer_sec.append(elapsed_time)
 
-                results = self.evaluate(inputs, outputs, i)
-                for key, val in results.items():
-                    if isinstance(val, torch.Tensor):
-                        val = float(val.detach().cpu().items())
-                    else:
-                        val = float(val)
+                if self.is_evaluable:
+                    results = self.evaluate(inputs, outputs, i)
+                    for key, val in results.items():
+                        if isinstance(val, torch.Tensor):
+                            val = float(val.detach().cpu().items())
+                        else:
+                            val = float(val)
 
-                    all_metrics[key].append(val)
-                    mlflow.log_metric('frame/' + key, val, i)
+                        all_metrics[key].append(val)
+                        mlflow.log_metric('frame/' + key, val, i)
 
                 self.save_figure(inputs, outputs, '{:05}'.format(i))
 

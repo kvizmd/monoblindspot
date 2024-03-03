@@ -62,10 +62,17 @@ class BlindSpotGenerator(Runner):
                         self.dataloader.dataset.parse_filename(
                             inputs['filename'][b])
 
+                    property_data = {
+                        'ogm2cam': outputs['T_norm2cam', 0, 0][b],
+                    }
+                    shape_data = {
+                        'points': outputs['bs_point', 0, 0][b],
+                        'scores': outputs['bs_confidence', 0, 0][b],
+                        'cells': outputs['bs_peak_cell', 0, 0][b],
+                    }
                     obj, out_filename = self.exporter(
                         folder, int(frame_idx), side,
-                        outputs['bs_point', 0, 0][b],
-                        outputs['bs_confidence', 0, 0][b])
+                        shape_data, property_data)
                     mlflow.log_dict(obj, os.path.join('json', out_filename))
 
                 if (i + 1) % self.figsave_iter == 0:

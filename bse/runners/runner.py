@@ -1,7 +1,9 @@
 import os
+from datetime import timedelta
 
 import torch
 from torch import nn
+from torch import distributed as dist
 from torch.utils import data
 import mlflow
 
@@ -10,8 +12,9 @@ class Runner:
     def __init__(self, cfg, rank=None):
         self.cfg = cfg
 
-        self.rank = rank
-        self.is_ddp = self.rank is not None
+        self.is_ddp = rank is not None
+        self.rank = rank if self.is_ddp else 0
+        self.is_main_process = self.rank == 0
         self.n_gpu = torch.cuda.device_count()
         self.is_cuda_available = \
             self.n_gpu > 0 and 'cuda' in cfg.DEVICE.lower()
@@ -20,11 +23,16 @@ class Runner:
 
         if self.is_ddp:
             self.rank = int(self.rank)
-            torch.distributed.init_process_group(
-                backend='nccl', rank=self.rank, world_size=self.n_gpu)
+            dist.init_process_group(
+                backend='nccl', rank=self.rank, world_size=self.n_gpu,
+                timeout=timedelta(seconds=10000))
             self.device = self.rank
         else:
             self.device = cfg.DEVICE
+
+    def __del__(self):
+        if self.is_ddp:
+            dist.destroy_process_group()
 
     def build_parallel_sampler(self, dataset: data.Dataset, **kwargs):
         if not self.is_parallel:
@@ -34,7 +42,7 @@ class Runner:
             return None
 
         return data.distributed.DistributedSampler(
-            dataset, rank=self.rank,
+            dataset, num_replicas=self.n_gpu, rank=self.rank,
             seed=self.cfg.RANDOM_SEED,
             **kwargs)
 
@@ -44,6 +52,8 @@ class Runner:
 
         if not self.is_ddp:
             return nn.DataParallel(model)
+
+        model = nn.SyncBatchNorm.convert_sync_batchnorm(model)
 
         return nn.parallel.DistributedDataParallel(
             model, device_ids=[self.rank])
@@ -55,6 +65,22 @@ class Runner:
                 self.log_params(val, key + '/')
             else:
                 mlflow.log_param(key, val)
+
+    def log_metric(self, *args, **kwargs):
+        if self.is_main_process:
+            mlflow.log_metric(*args, **kwargs)
+
+    def log_state_dict(self, *args, **kwargs):
+        if self.is_main_process:
+            mlflow.pytorch.log_state_dict(*args, **kwargs)
+
+    def _print(self, *args):
+        if self.is_main_process:
+            print(*args)
+
+    def sync_process(self):
+        if self.is_ddp:
+            dist.barrier()
 
     def transfer(self, inputs: dict):
         for key in inputs.keys():
@@ -68,16 +94,20 @@ class Runner:
         if experiment_tag is not None:
             mlflow.set_experiment(experiment_name=experiment_tag)
 
-        with mlflow.start_run(run_name=run_name) as _:
+        with mlflow.start_run(run_name=run_name) as run:
+            self.ml_run = run
+
             self.log_params(self.cfg)
             self.entry()
+
+            self.ml_run = None
 
     def run_parallel(self, experiment_id: str, run_id: str):
         mlflow.set_experiment(experiment_id=experiment_id)
         with mlflow.start_run(
                 run_id=run_id,
                 experiment_id=experiment_id) as _:
-            if self.rank == 0:
+            if self.is_main_process:
                 self.log_params(self.cfg)
             self.entry()
 
@@ -94,6 +124,6 @@ def create_parallel_run(experiment_tag: str, run_name: str) -> tuple:
         run_id = run.info.run_id
 
     os.environ['MASTER_ADDR'] = 'localhost'
-    os.environ['MASTER_PORT'] = '11111'
+    os.environ['MASTER_PORT'] = '12323'
 
     return exp.experiment_id, run_id

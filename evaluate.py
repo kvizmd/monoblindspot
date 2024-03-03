@@ -30,7 +30,8 @@ def main():
     override_opts = [
         'DATA.BATCH_SIZE', '1',
         'DATA.SCALES', '[0]',
-        'TRAIN.BS.OFFLINE_LABELS', ''
+        'TRAIN.BS.BS_LABEL', '',
+        'TRAIN.BS.BS_LABELS', '[]',
     ]
     override_opts += args.opts
 

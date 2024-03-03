@@ -4,3 +4,4 @@ data
 outputs
 mlruns
 exp
+grid_search.sh

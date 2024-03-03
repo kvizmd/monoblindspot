@@ -34,4 +34,5 @@ docker run \
   bash
 
 docker start $container_name
+docker exec -it $container_name pip install -r requirements.txt
 docker exec -it $container_name bash

@@ -1,10 +1,18 @@
 from .ogm import OGMIntegrator
+from .ambiguous import AmbiguousOGMIntegrator
+from .cascade import CascadeOGMIntegrator
+from .oracle_scale import OracleScaleOGMIntegrator
+from .oracle_scale_oxts import OracleScaleOxtsOGMIntegrator
 from .sequential import SequentialOGMIntegrator
 
 
 def build_integrator(cfg, models) -> OGMIntegrator:
     integrator_class = {
+        'cascade': CascadeOGMIntegrator,
         'sequential': SequentialOGMIntegrator,
+        'oracle_scale': OracleScaleOGMIntegrator,
+        'oracle_scale_oxts': OracleScaleOxtsOGMIntegrator,
+        'ambiguous': AmbiguousOGMIntegrator
     }[str(cfg.OGM.NAME).lower()]
 
     return integrator_class(

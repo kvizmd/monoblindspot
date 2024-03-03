@@ -19,8 +19,3 @@ def logit(
         p: torch.Tensor,
         epx: float = 1e-10) -> torch.Tensor:
     return torch.log(p / (1 - p).clamp(min=1e-10))
-
-
-def normalize_iam(x: torch.Tensor) -> torch.Tensor:
-    normalizer = x.sum(-1, keepdims=True).clamp(min=1e-6)
-    return x / normalizer

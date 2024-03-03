@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 
-from .dcn import DCN
+from bse.models.layers import DeformableConv2d
 
 
 class ConvBlock(nn.Module):
@@ -28,7 +28,7 @@ class DCNBlock(nn.Module):
             nn.BatchNorm2d(out_channels),
             nn.ReLU(inplace=True)
         )
-        self.conv = DCN(
+        self.conv = DeformableConv2d(
             in_channels, out_channels,
             kernel_size=3, stride=1, padding=1)
 
@@ -39,7 +39,7 @@ class DCNBlock(nn.Module):
 
 
 class GroupNorm2d(nn.GroupNorm):
-    def __init__(self, out_channels: int, num_groups: int= 32):
+    def __init__(self, out_channels: int, num_groups: int = 32):
         if out_channels % 32 != 0:
             num_groups = num_groups // 2
         super().__init__(num_groups, out_channels)

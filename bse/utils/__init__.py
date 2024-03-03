@@ -1,4 +1,5 @@
 from .diff import right_minus_left, left_minus_right
+from .filter import gaussian_3x3, GaussianConv2d
 from .ransac import RANSAC
 from .scheduler import GradualWarmupScheduler
 
@@ -6,6 +7,15 @@ from .random import \
     fix_random_state, \
     seed_worker, \
     get_random_seed
+
+from .heatmap import \
+    create_heatmap, \
+    create_vp_offset_map, \
+    generate_gaussian_1d, \
+    generate_gaussian_2d, \
+    heatmap_nms, \
+    overlay_at_center, \
+    extract_heatmap_peak
 
 from .metric import \
     compute_binary_metrics, \
@@ -29,7 +39,8 @@ from .depth import \
 
 from .pose import \
     transformation_from_parameters, \
-    get_translation_matrix
+    get_translation_matrix, \
+    scaling_from_parameters
 
 from .figure import \
     to_numpy, \

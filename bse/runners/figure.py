@@ -1,3 +1,4 @@
+import os
 from PIL import Image, ImageOps
 import contextlib
 
@@ -16,12 +17,14 @@ from bse.utils.figure import \
     put_colorized_points, \
     alpha_blend
 
-DPI = 100
-# DPI = 300  # High Resolution
+if os.environ.get('HIGH_DPI', False):
+    DPI = 300  # High Resolution
+else:
+    DPI = 100
 
 
 @contextlib.contextmanager
-def make_depth_figure(inputs: dict, outputs: dict) -> plt.Figure:
+def make_depth_figure(inputs: dict, outputs: dict, **kwargs) -> plt.Figure:
     fig = plt.figure(figsize=(12, 5), tight_layout=True, dpi=DPI)
 
     color = to_numpy(inputs['color', 0, 0][0])
@@ -51,13 +54,14 @@ def make_depth_figure(inputs: dict, outputs: dict) -> plt.Figure:
 def make_bs_figure(
         inputs: dict,
         outputs: dict,
-        score_thr: float = 0.3) -> plt.Figure:
+        score_thr: float = 0.3,
+        **kwargs) -> plt.Figure:
     color = to_numpy(inputs['color', 0, 0][0])
     pred_points = to_numpy(outputs['bs_point', 0, 0][0])
     pred_scores = to_numpy(outputs['bs_confidence', 0, 0][0])
 
     bs_gt = to_numpy(inputs['bs_gt'][0])
-    if bs_gt.shape[-1] == 3:
+    if bs_gt.shape[-1] >= 3:
         # Generated labels
         gt_points = bs_gt[:, :2]
         gt_scores = bs_gt[:, 2]
@@ -99,7 +103,7 @@ def make_bs_figure(
 
 
 @contextlib.contextmanager
-def make_bsgen_figure(inputs: dict, outputs: dict) -> plt.Figure:
+def make_bsgen_figure(inputs: dict, outputs: dict, **kwargs) -> plt.Figure:
     color = to_numpy(inputs['color', 0, 0][0])
     height, width = color.shape[-2:]
     color = to_u8(color)

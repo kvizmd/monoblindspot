@@ -12,7 +12,10 @@ from torchvision import transforms
 from torch.nn import functional as F
 
 import bse
-from bse.utils.figure import put_colorized_points, alpha_blend
+from bse.utils.figure import \
+    put_colorized_points, \
+    alpha_blend, \
+    to_numpy
 
 
 def main():
@@ -39,14 +42,21 @@ def main():
         '--opts',
         type=str,
         nargs='*',
+        default=[],
         help='Override yaml configs with the same way as detectron2')
     args = parser.parse_args()
 
+    override_opts = ['EVAL.BS.SCORE_THRESHOLD', str(args.score_thr)]
+
     cfg = bse.load_config(
         args.config,
-        override_opts=args.opts,
+        override_opts=override_opts + args.opts,
         check_requirements=False)
-    inference(cfg, args.input, args.out_dir, score_thr=args.score_thr)
+    inference(
+        cfg,
+        args.input,
+        args.out_dir,
+        score_thr=args.score_thr)
 
 
 def inference(
@@ -107,8 +117,8 @@ def inference(
         points = points[mask]
 
         # Visualization
-        scores = scores.detach().cpu().numpy()
-        points = points.detach().cpu().numpy()
+        scores = to_numpy(scores)
+        points = to_numpy(points)
 
         pred_overlay = put_colorized_points(
             original_height, original_width, points, scores)
@@ -116,7 +126,8 @@ def inference(
 
         out_filename = os.path.join(
             out_dir, os.path.basename(filename))
-        Image.fromarray(visualization).save(out_filename)
+        visualization = Image.fromarray(visualization)
+        visualization.save(out_filename)
 
 
 if __name__ == '__main__':

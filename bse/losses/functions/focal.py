@@ -3,10 +3,16 @@ from torch import nn
 
 
 class FocalLoss(nn.Module):
-    def __init__(self, alpha=-1, gamma=2):
+    def __init__(
+            self,
+            alpha=-1,
+            gamma=2,
+            reduction='instance'):
         super().__init__()
         self.alpha = alpha
         self.gamma = gamma
+
+        self.reduction = reduction.lower()
 
     def forward(self, pred, target, weight=None):
         ploss = \
@@ -27,7 +33,11 @@ class FocalLoss(nn.Module):
         if weight is not None:
             loss *= weight
 
-        B = target.shape[0]
-        pnum = target.ge(1).view(B, -1).sum(dim=1)
-        loss = loss.view(B, -1).sum(dim=1) / pnum.clamp(min=1)
-        return loss.mean()
+        if self.reduction == 'sum':
+            return loss.sum()
+        if self.reduction == 'mean':
+            return loss.mean()
+        if self.reduction == 'instance':
+            pnum = target.ge(1).sum()
+            return loss.sum() / pnum.clamp(min=1)
+        return loss

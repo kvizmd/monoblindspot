@@ -1,0 +1,30 @@
+_BASE_: 'configs/depth_default.yaml'
+
+DATA:
+  NAME: 'Cityscapes'
+  TRAIN_SPLIT: 'splits/cityscapes/train_files.txt'
+  VAL_SPLIT: 'splits/cityscapes/val_files.txt'
+  TEST_SPLIT: 'splits/cityscapes/test_files.txt'
+
+  BATCH_SIZE: 10
+  IMG_HEIGHT: 192
+  IMG_WIDTH: 640
+
+  # 17Hz
+  FRAME_IDXS: [0, -2, 2]
+
+TRAIN:
+  MAX_EPOCHS: 15
+  LR_MILESTONES: [10]
+  WARMUP_ITERS: 100
+  FIGSAVE_ITER: 2000
+
+  DEPTH:
+    LR: 0.0001
+
+  POSE:
+    LR: 0.0001
+
+LOSS:
+  DEPTH:
+    FRAME_IDXS: [0, -2, 2]

@@ -6,13 +6,13 @@ DATA:
   VAL_SPLIT: 'splits/nusc/test_files.txt'
   TEST_SPLIT: 'splits/nusc/test_files.txt'
 
-  BATCH_SIZE: 4
-  IMG_HEIGHT: 352
+  BATCH_SIZE: 10
+  IMG_HEIGHT: 192
   IMG_WIDTH: 640
 
 TRAIN:
-  MAX_EPOCHS: 20
-  LR_MILESTONES: [15]
+  MAX_EPOCHS: 25
+  LR_MILESTONES: [15, 20]
   WARMUP_ITERS: 300
 
   DEPTH:

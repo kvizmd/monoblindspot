@@ -26,23 +26,17 @@ def transformation_from_parameters(
     return M
 
 
-def get_translation_matrix(translation_vector: torch.Tensor) -> torch.Tensor:
+def get_translation_matrix(vec: torch.Tensor) -> torch.Tensor:
     """
     Convert a translation vector into a 4x4 transformation matrix
     """
-
     T = torch.zeros(
-        translation_vector.shape[0], 4, 4,
-        device=translation_vector.device)
-
-    t = translation_vector.contiguous().view(-1, 3, 1)
-
+        (vec.shape[0], 4, 4), dtype=vec.dtype, device=vec.device)
     T[:, 0, 0] = 1
     T[:, 1, 1] = 1
     T[:, 2, 2] = 1
     T[:, 3, 3] = 1
-    T[:, :3, 3, None] = t
-
+    T[:, :3, 3, None] = vec.contiguous().view(-1, 3, 1)
     return T
 
 
@@ -74,8 +68,8 @@ def rot_from_axisangle(vec: torch.Tensor) -> torch.Tensor:
     yzC = y * zC
     zxC = z * xC
 
-    rot = torch.zeros((vec.shape[0], 4, 4)).to(device=vec.device)
-
+    rot = torch.zeros(
+        (vec.shape[0], 4, 4), dtype=vec.dtype, device=vec.device)
     rot[:, 0, 0] = torch.squeeze(x * xC + ca)
     rot[:, 0, 1] = torch.squeeze(xyC - zs)
     rot[:, 0, 2] = torch.squeeze(zxC + ys)
@@ -88,3 +82,13 @@ def rot_from_axisangle(vec: torch.Tensor) -> torch.Tensor:
     rot[:, 3, 3] = 1
 
     return rot
+
+
+def scaling_from_parameters(scale: torch.Tensor) -> torch.Tensor:
+    T = torch.zeros(
+        (scale.shape[0], 4, 4), dtype=scale.dtype, device=scale.device)
+    T[:, 0, 0] = scale[..., 0].view(-1)
+    T[:, 1, 1] = scale[..., 1].view(-1)
+    T[:, 2, 2] = scale[..., 2].view(-1)
+    T[:, 3, 3] = 1
+    return T

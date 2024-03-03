@@ -10,8 +10,8 @@ class Exporter:
             self,
             img_filename: str,
             bs_filename: str,
-            bs_points: torch.Tensor,
-            bs_confidence: torch.Tensor):
+            shape_data: dict,
+            property_data: dict = {}):
         # labelme style
         obj = {
             'version': '5.1.1',
@@ -23,18 +23,23 @@ class Exporter:
             'imageData': None
         }
 
-        if len(bs_points) > 0:
-            points = bs_points.tolist()
-            scores = bs_confidence.tolist()
+        for key, val in property_data.items():
+            if isinstance(val, torch.Tensor):
+                val = val.tolist()
+            obj[key] = val
 
-            for p, s in zip(points, scores):
-                obj['shapes'].append({
-                    'label': 'blindspot',
-                    'points': [p],
-                    'group_id': None,
-                    'shape_type': 'point',
-                    'flags': {},
-                    'scores': [s]})
+        num = len(shape_data['points'])
+        for i in range(num):
+            shape_item = {
+                'label': 'blindspot',
+                'group_id': None,
+                'shape_type': 'point',
+                'flags': {},
+            }
+            for key, val in shape_data.items():
+                shape_item[key] = [val[i].tolist()]
+
+            obj['shapes'].append(shape_item)
 
         return obj
 
@@ -57,13 +62,11 @@ class Exporter:
             folder: str,
             frame_index: str,
             side: str,
-            bs_points: torch.Tensor,
-            bs_confidence: torch.Tensor) -> dict:
-
+            shape_data: dict,
+            property_data: dict = {}) -> dict:
         img_filename = self.get_image_path(folder, frame_index, side)
         bs_filename = self.get_label_path(folder, frame_index, side)
 
         obj = self.create_label_object(
-            img_filename, bs_filename, bs_points, bs_confidence)
-
+            img_filename, bs_filename, shape_data, property_data)
         return obj, bs_filename

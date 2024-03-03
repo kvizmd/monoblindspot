@@ -1,5 +1,6 @@
 from .depth import DepthCriterion
 from .bs_bipart import BipartCriterion
+from .bs_heatmap import HeatmapCriterion
 
 
 def build_criterion(cfg) -> dict:
@@ -16,6 +17,7 @@ def build_criterion(cfg) -> dict:
     if cfg.LOSS.BS.FACTOR > 0:
         bs_crit = {
             'bipart': BipartCriterion,
+            'heatmap': HeatmapCriterion,
         }[cfg.LOSS.BS.NAME.lower()]
 
         crits['bs'] = bs_crit(
@@ -25,6 +27,7 @@ def build_criterion(cfg) -> dict:
             offset_factor=cfg.LOSS.BS.OFFSET_FACTOR,
             score_match=cfg.LOSS.BS.SCORE_MATCH,
             pos_match=cfg.LOSS.BS.POS_MATCH,
+            heatmap_radius=cfg.LOSS.BS.HEATMAP_RADIUS,
             occ_weighting=cfg.LOSS.BS.OCC_WEIGHTING)
 
     return crits

@@ -1,4 +1,4 @@
-FROM nvidia/cuda:11.2.2-devel-ubuntu20.04
+FROM pytorch/pytorch:2.1.2-cuda11.8-cudnn8-devel
 
 ENV DEBCONF_NOWARNINGS=yes
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
@@ -22,7 +22,3 @@ RUN apt update && apt upgrade -y \
     pyqt5-dev-tools \
     qttools5-dev-tools \
   && apt remove -y python3-blinker
-
-RUN pip3 install pip --upgrade \
-  && pip3 install torch torchvision torchaudio \
-    --extra-index-url https://download.pytorch.org/whl/cu113

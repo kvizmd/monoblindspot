@@ -68,6 +68,7 @@ class ImageProjector(torch.nn.Module):
                 ogm, sampling_mask, K, T_ogm2cam)
 
         peak_cells = [[] for _ in range(batch_size)]
+        peak_offsets = [[] for _ in range(batch_size)]
         peak_probs = [[] for _ in range(batch_size)]
         extracted_cells = self.extract_occupancy_peak(ogm_prob, visible_mask)
         for cell in extracted_cells:
@@ -78,18 +79,17 @@ class ImageProjector(torch.nn.Module):
             y = ogm.height[b]
             x = x.to(y)
             z = z.to(y)
-            cell_ptcloud = torch.stack((x, y, z))
+            peak_cells[b].append(torch.stack((x, y, z)))
 
             # To reduce quantization error, the coordinates of the grid are
             # mapped to the back side near the center of road.
             if x < ogm.size // 2:
-                cell_ptcloud += self.proj_left_offset
+                peak_offsets[b].append(self.proj_left_offset)
             else:
-                cell_ptcloud += self.proj_right_offset
-
-            peak_cells[b].append(cell_ptcloud)
+                peak_offsets[b].append(self.proj_right_offset)
 
         peak_cells = [stack_list(c) for c in peak_cells]
+        peak_offsets = [stack_list(o) for o in peak_offsets]
         peak_probs = [stack_list(p) for p in peak_probs]
         peak_img_points = [
             torch.empty(0, 2, **factory_args) for _ in range(batch_size)]
@@ -108,6 +108,11 @@ class ImageProjector(torch.nn.Module):
             cell.view(-1, 3, 1)
             for i, cell in enumerate(peak_cells) if nums[i] > 0])
 
+        # (B + Ngt) x 3 x 1
+        offsets = torch.cat([
+            offset.view(-1, 3, 1)
+            for i, offset in enumerate(peak_offsets) if nums[i] > 0])
+
         # (B + Ngt) x 3 x 3
         T = torch.cat([
             _T.view(1, 4, 4).expand(nums[i], -1, -1)
@@ -118,7 +123,7 @@ class ImageProjector(torch.nn.Module):
             _K.view(1, 4, 4).expand(nums[i], -1, -1)
             for i, _K in enumerate(K) if nums[i] > 0])
 
-        cells = transform_point_cloud(T, cells)
+        cells = transform_point_cloud(T, cells + offsets)
         points = project_to_2d(cells, K)
         points[:, 0] /= width - 1
         points[:, 1] /= height - 1

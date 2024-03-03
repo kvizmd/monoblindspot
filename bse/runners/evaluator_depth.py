@@ -17,15 +17,19 @@ class DepthEvaluator(Evaluator):
         self.min_depth = 1e-3
         self.max_depth = 80
 
-        self.use_eigen_crop = 'eigen' in self.cfg.DATA.TEST_SPLIT
-        if self.use_eigen_crop:
-            print('Enable eigen cropping')
+        if 'kitti' in self.cfg.DATA.NAME.lower():
+            self.use_eigen_crop = 'eigen' in self.cfg.DATA.TEST_SPLIT
+            if self.use_eigen_crop:
+                print('Enable eigen cropping')
 
-        gt_path = os.path.join(
-            os.path.dirname(self.cfg.DATA.TEST_SPLIT), 'gt_depths.npz')
-        self.gt_depths = np.load(
-            gt_path, fix_imports=True,
-            encoding='latin1', allow_pickle=True)['data']
+            gt_path = os.path.join(
+                os.path.dirname(self.cfg.DATA.TEST_SPLIT), 'gt_depths.npz')
+            self.gt_depths = np.load(
+                gt_path, fix_imports=True,
+                encoding='latin1', allow_pickle=True)['data']
+
+        else:
+            self.is_evaluable = False
 
     def predict(self, inputs):
         return self.model(inputs['color', 0, 0])

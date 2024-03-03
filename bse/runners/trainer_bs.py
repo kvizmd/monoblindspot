@@ -41,13 +41,15 @@ class BlindSpotTrainer(Trainer):
         out_metrics = defaultdict(int)
 
         pred_points = outputs['bs_point', 0, 0]
+        batch_size = len(pred_points)
+
         pred_scores = outputs['bs_confidence', 0, 0]
         masks = pred_scores >= self.score_threshold
-        masks = masks.view(self.batch_size, -1)
+        masks = masks.view(batch_size, -1)
 
         gt_points = inputs['bs_gt']
         ignore_mask = inputs['bs_ignore']
-        for b in range(self.batch_size):
+        for b in range(batch_size):
             gt = ignore_negative(gt_points[b])
             gt = ignore_on_mask(gt, ignore_mask[b])
 
@@ -78,7 +80,7 @@ class BlindSpotTrainer(Trainer):
 
         return out_metrics
 
-    def load_offline_label(self, inputs: dict, outputs: dict):
+    def load_label(self, inputs: dict, outputs: dict):
         outputs['bs_point_gen', 0, 0] = []
         outputs['bs_confidence_gen', 0, 0] = []
 
@@ -86,7 +88,7 @@ class BlindSpotTrainer(Trainer):
             bs_gt = inputs['bs_gt'][b]
             bs_gt = ignore_negative(bs_gt)
 
-            if bs_gt.shape[-1] == 3:
+            if bs_gt.shape[-1] >= 3:
                 point = bs_gt[..., :2]
                 score = bs_gt[..., 2]
 

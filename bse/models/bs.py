@@ -11,6 +11,7 @@ class BSNetBase(ModelBase):
             prior_prob: float = 0.1,
             down_ratio: int = 8,
             group_num: int = 1,
+            score_threshold: float = 0.01,
             group_norm: bool = False,
             deform_conv: bool = False):
         super().__init__()
@@ -24,8 +25,9 @@ class BSNetBase(ModelBase):
             deform_conv=deform_conv)
 
         self.decoder = decoder(
-            self.encoder.out_channels,
+            self.encoder.num_ch_enc,
             head_channels=256,
             inst_num=inst_num,
             prior_prob=prior_prob,
+            score_threshold=score_threshold,
             group_num=group_num)

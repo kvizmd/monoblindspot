@@ -7,11 +7,11 @@ from .functions import ReprojectionLoss, SmoothnessLoss
 class DepthCriterion(Criterion):
     def __init__(
             self,
-            frame_idxs,
-            scales,
-            factor=1.0,
-            smooth_scaling=True,
-            smooth_factor=0.001):
+            frame_idxs: list,
+            scales: list,
+            factor: float = 1.0,
+            smooth_scaling: bool = True,
+            smooth_factor: float = 0.001):
         super().__init__(factor)
         self.frame_idxs = frame_idxs
         self.scales = scales

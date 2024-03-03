@@ -7,6 +7,7 @@ DATA:
   TRAIN_SPLIT: 'splits/kitti/bs/train_files.txt'
   VAL_SPLIT: 'splits/kitti/bs/val_files.txt'
   TEST_SPLIT: 'splits/kitti/bs/test_files.txt'
+  BS_LABEL: '@REQUIRED@'
 
   BATCH_SIZE: 48
   IMG_HEIGHT: 192
@@ -26,8 +27,6 @@ TRAIN:
   BS:
     ENCODER_LR: 0.0001
     DECODER_LR: 0.0001
-
-    OFFLINE_LABELS: '@REQUIRED@'
 
 MODEL:
   DEPTH:

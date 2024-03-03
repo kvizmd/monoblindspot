@@ -1,0 +1,23 @@
+_BASE_: 'configs/depth_default.yaml'
+
+DATA:
+  NAME: 'DDAD'
+  TRAIN_SPLIT: 'splits/ddad/train_files.txt'
+  VAL_SPLIT: 'splits/ddad/val_files.txt'
+  TEST_SPLIT: 'splits/ddad/val_files.txt'
+
+  BATCH_SIZE: 10
+  IMG_HEIGHT: 192
+  IMG_WIDTH: 640
+
+TRAIN:
+  MAX_EPOCHS: 25
+  LR_MILESTONES: [10, 15]
+  WARMUP_ITERS: 1000
+  FIGSAVE_ITER: 500
+
+  DEPTH:
+    LR: 0.00005
+
+  POSE:
+    LR: 0.00005

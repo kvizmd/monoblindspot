@@ -33,9 +33,10 @@ Pre-processing is required for training and evaluation with public datasets.
 For more details, please refer to the following documents, which also describe directory structure and annotation format.
 
 - [KITTI](splits/kitti)
-- [nuScenes](splits/nusc) 
-- Cityscapes (Coming soon)
-- DDAD (Coming soon)
+- [nuScenes](splits/nusc)
+- [Cityscapes](splits/cityscapes)
+- [DDAD](splits/ddad)
+- [Ithaca365](splits/ithaca365)
 
 Currently, there is no support for extensions to custom datasets.
 
@@ -86,7 +87,7 @@ $ python train.py \
     --config configs/bs_kitti_dla34_iam_s8.yaml \
     --opts \
       DATA.ROOT_DIR data/kitti \
-      TRAIN.BS.OFFLINE_LABELS /path/to/json
+      DATA.BS_LABEL /path/to/json
 ```
 
 ## Visualization
@@ -132,9 +133,10 @@ $ python infer.py \
     --out_dir outputs/predictions
 ```
 
+<!--
 ## Models
 The checkpoints are coming soon.
-<!--For code compatibility, these are newly trained weights, not those used in the experiments in the paper.-->
+For code compatibility, these are newly trained weights, not those used in the experiments in the paper.
 
 |**Model**|**FPS**|**Parameter (M)**|**Link**|
 |:---:|:---:|:---:|:---:|
@@ -142,7 +144,7 @@ The checkpoints are coming soon.
 |DLA34-IAM|127.52|21.15|Download|
 
 **FPS** was measured on NVIDIA TITAN V with `torch.backends.cudnn.benchmark` enabled.
-
+-->
 
 ## Development
 We employ the `unittest` library for unit tests, which is executable with the following command.

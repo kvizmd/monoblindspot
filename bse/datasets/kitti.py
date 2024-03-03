@@ -55,7 +55,7 @@ class KITTIDataset(Dataset):
             folder: str,
             frame_index: int,
             side: str,
-            do_flip: str) -> np.ndarray:
+            augments: dict) -> np.ndarray:
         filepath = os.path.join(
             self.data_path, folder,
             'image_0{}/data'.format(self.side_map[side]),
@@ -65,10 +65,7 @@ class KITTIDataset(Dataset):
             return None
 
         color = self.load_image(filepath)
-        color = color.resize(self.full_res_shape, Image.BILINEAR)
-
-        if do_flip:
-            color = color.transpose(Image.FLIP_LEFT_RIGHT)
+        color = color.resize((self.width, self.height), Image.BILINEAR)
 
         return color
 
@@ -93,15 +90,11 @@ class KITTIDataset(Dataset):
             folder: str,
             frame_index: int,
             side: str,
-            do_flip: bool) -> np.ndarray:
+            augments: dict) -> np.ndarray:
         if self.use_calib_intrinsic:
             K = self._get_calib_intrinsic(folder, side)
         else:
             K = self.K.copy()
-
-        if do_flip:
-            K[0, 2] = 1.0 - K[0, 2]
-
         return K
 
     def store_additional(
@@ -110,12 +103,11 @@ class KITTIDataset(Dataset):
             folder: str,
             frame_idx: int,
             side: str,
-            do_flip: bool,
-            do_colorjit: bool):
+            augments: dict):
 
         if self.require_depth_gt:
             self.store_depth(
-                inputs, folder, frame_idx, side, do_flip)
+                inputs, folder, frame_idx, side, augments)
 
         if self.require_pose:
             self.store_pose(inputs, folder, frame_idx, side)
@@ -125,7 +117,7 @@ class KITTIDataset(Dataset):
             folder: str,
             frame_index: int,
             side: str,
-            do_flip: bool) -> np.ndarray:
+            augments: dict) -> np.ndarray:
         calib_path = os.path.join(self.data_path, folder.split('/')[0])
         velo_filename = os.path.join(
             self.data_path,
@@ -144,7 +136,7 @@ class KITTIDataset(Dataset):
             order=0, preserve_range=True, mode='constant')
         depth_gt = depth_gt.astype(np.float32)
 
-        if do_flip:
+        if augments['flip']:
             depth_gt = np.fliplr(depth_gt).copy()
 
         return depth_gt
@@ -155,9 +147,10 @@ class KITTIDataset(Dataset):
             folder: str,
             frame_index: int,
             side: str,
-            do_flip: bool):
+            augments: dict):
         for i in self.frame_indices:
-            depth_gt = self.get_depth(folder, frame_index + i, side, do_flip)
+            depth_gt = self.get_depth(
+                folder, frame_index + i, side, augments)
 
             if depth_gt is not None:
                 depth_gt = torch.from_numpy(np.expand_dims(depth_gt, 0))

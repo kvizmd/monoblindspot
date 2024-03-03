@@ -1,0 +1,9 @@
+_BASE_: configs/bs_kitti_default.yaml
+
+DATA:
+  NAME: 'ithaca'
+  ROOT_DIR: '@REQUIRED@'
+  TRAIN_SPLIT: 'splits/ithaca365/train_files.txt'
+  VAL_SPLIT: 'splits/ithaca365/val_files.txt'
+  TEST_SPLIT: 'splits/ithaca365/val_files.txt'
+  BS_LABEL: '@REQUIRED@'

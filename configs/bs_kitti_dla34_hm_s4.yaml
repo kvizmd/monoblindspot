@@ -1,0 +1,34 @@
+_BASE_: configs/bs_kitti_default.yaml
+
+DATA:
+  BATCH_SIZE: 48
+  IMG_HEIGHT: 192
+  IMG_WIDTH: 640
+
+TRAIN:
+  MAX_EPOCHS: 42
+  LOGGING_ITER: 50
+  FIGSAVE_ITER: 300
+  LR_MILESTONES: [30, 38]
+  WARMUP_ITERS: 1000
+
+  BS:
+    ENCODER_LR: 5e-4
+    DECODER_LR: 5e-4
+
+MODEL:
+  BS:
+    NAME: 'dla_heatmap'
+    NUM_LAYERS: 34
+    PRIOR_PROB: 0.1
+    DOWN_RATIO: 4
+    GROUP_NORM: True
+    DEFORMABLE: True
+
+LOSS:
+  BS:
+    NAME: 'heatmap'
+    FACTOR: 1.0
+    CLS_FACTOR: 1.0
+    OFFSET_FACTOR: 1.0
+    HEATMAP_RADIUS: 1.0

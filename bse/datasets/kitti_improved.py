@@ -15,7 +15,7 @@ class KITTIImprovedDataset(KITTIDataset):
             folder: str,
             frame_index: int,
             side: str,
-            do_flip: bool) -> np.ndarray:
+            augments: dict) -> np.ndarray:
         depth_path = os.path.join(
             self.data_path,
             folder,
@@ -30,7 +30,7 @@ class KITTIImprovedDataset(KITTIDataset):
         depth_gt = depth_gt.resize(self.full_res_shape, Image.NEAREST)
         depth_gt = np.array(depth_gt).astype(np.float32) / 256
 
-        if do_flip:
+        if augments['flip']:
             depth_gt = np.fliplr(depth_gt).copy()
 
         return depth_gt

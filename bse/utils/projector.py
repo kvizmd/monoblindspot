@@ -87,10 +87,10 @@ def project_to_2d(
         P = torch.matmul(K, T)[:, :3, :]
 
     ones = torch.ones_like(xyz[:, :1], requires_grad=False)
-    xyza = torch.cat([xyz, ones], dim=1)
+    xyza = torch.cat([xyz, ones], dim=-2)
 
     uv = torch.matmul(P, xyza)
-    uv = uv[:, :2] / (uv[:, 2:3] + eps)
+    uv = uv[:, :2, :] / (uv[:, 2:3, :] + eps)
     return uv
 
 

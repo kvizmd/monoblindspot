@@ -14,8 +14,8 @@ class nuScenesDataset(Dataset):
         self.use_calib_intrinsic = True
 
         # Averaged intrinsic matrix
-        self.K = np.array([[0.786, 0, 0.513, 0],
-                           [0, 1.398, 0.533, 0],
+        self.K = np.array([[0.786, 0, 0.5, 0],
+                           [0, 1.398, 0.5, 0],
                            [0, 0, 1, 0],
                            [0, 0, 0, 1]], dtype=np.float32)
 
@@ -98,28 +98,12 @@ class nuScenesDataset(Dataset):
         frame_idx = int(line[1])
         return folder, frame_idx, None
 
-    def get_intrinsic(
-            self,
-            folder: str,
-            frame_index: int,
-            side: str,
-            do_flip: bool) -> np.ndarray:
-        if self.use_calib_intrinsic:
-            K = self._get_calib_intrinsic(folder, frame_index)
-        else:
-            K = self.K.copy()
-
-        if do_flip:
-            K[0, 2] = 1.0 - K[0, 2]
-
-        return K
-
     def get_color(
             self,
             folder: str,
             frame_index: int,
             side: str,
-            do_flip: bool) -> np.ndarray:
+            augments: dict) -> np.ndarray:
         folder_table = self.file_table.get(folder, {})
         if not folder_table:
             return None
@@ -133,12 +117,21 @@ class nuScenesDataset(Dataset):
             return None
 
         color = self.load_image(filepath)
-        color = color.resize(self.full_res_shape, Image.BILINEAR)
-
-        if do_flip:
-            color = color.transpose(Image.FLIP_LEFT_RIGHT)
-
+        color, _ = self.hcrop_pil(color, self.height / self.width)
+        color = color.resize((self.width, self.height), Image.BILINEAR)
         return color
+
+    def get_intrinsic(
+            self,
+            folder: str,
+            frame_index: int,
+            side: str,
+            augments: dict) -> np.ndarray:
+        if self.use_calib_intrinsic:
+            K = self._get_calib_intrinsic(folder, frame_index)
+        else:
+            K = self.K.copy()
+        return K
 
     def _get_calib_intrinsic(self, folder, frame_index) -> np.ndarray:
         data = self.file_table[folder][frame_index]
@@ -146,7 +139,10 @@ class nuScenesDataset(Dataset):
         K = np.eye(4, dtype=np.float32)
         K[:3, :3] = np.array(data['intrinsic'], dtype=np.float32)
 
-        K[0, :] /= self.raw_shape[0]
-        K[1, :] /= self.raw_shape[1]
+        W, H = self.raw_shape
+        K, new_H = self.hcrop_intrinsic(K, W, H, self.height / self.width)
+
+        K[0, :] /= W
+        K[1, :] /= new_H
 
         return K

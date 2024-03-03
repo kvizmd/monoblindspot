@@ -58,6 +58,7 @@ class DLAEncoder(nn.Module):
                 conv_func=conv_func)
 
         self.out_channels = out_channel
+        self.num_ch_enc = [out_channel]
 
     def forward(self, x: torch.Tensor) -> list:
         x = self.base(x)
@@ -67,5 +68,4 @@ class DLAEncoder(nn.Module):
         for i in range(self.last_level - self.first_level):
             y.append(x[i].clone())
         self.ida_up(y, 0, len(y))
-
         return y

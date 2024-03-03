@@ -20,7 +20,9 @@ class SparseInstEncoder(nn.Module):
         self.base = ResNetEncoder(num_layers, pretrained=pretrained)
         self.extractor = ContextExtractor(self.base.num_ch_enc, ppm_channels)
         self.out_channels = ppm_channels
+        self.num_ch_enc = [ppm_channels]
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        y = self.extractor(self.base(x))
+        features = self.base(x)
+        y = self.extractor(features)
         return y
